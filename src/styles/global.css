@@ -53,4 +53,43 @@
   .badge-elig-possivel { @apply bg-amber-100 text-amber-900; }
   .badge-elig-nao_elegivel { @apply bg-slate-100 text-slate-600; }
   .badge-elig-nao_avaliado { @apply bg-slate-100 text-slate-600; }
+
+  .banner {
+    @apply rounded-xl px-4 py-3 text-sm flex items-start gap-2 mb-4;
+  }
+  .banner-info {
+    @apply bg-brand-50 border border-brand-100 text-brand-700;
+  }
+  .banner-warn {
+    @apply bg-amber-50 border border-amber-200 text-amber-900;
+  }
+  .toast {
+    @apply fixed bottom-4 left-1/2 -translate-x-1/2 z-50
+           bg-ink text-white text-sm rounded-full px-4 py-2 shadow-lg
+           transition-opacity;
+  }
 }
+
+/* ── Print stylesheet ────────────────────────────────────────────────
+ * Single global block; deliberately outside @layer so utility overrides
+ * cannot win against print-only rules.
+ *
+ * Note: forcing <details> open on print is not reliably possible in pure
+ * CSS across browsers. The Wizard component installs a beforeprint /
+ * afterprint / matchMedia("print") listener trio that toggles `open`
+ * imperatively. These rules cover layout only. */
+@media print {
+  header, footer, .nav-link, .nav-cta, .btn-primary, .btn-secondary,
+  .toast { display: none !important; }
+  main { padding: 0 !important; max-width: none !important; }
+  body { background: white !important; color: black !important; }
+  a { color: inherit !important; text-decoration: underline; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; color: #555; }
+  details { break-inside: avoid; }
+  details > summary { list-style: none; }
+  details > summary::-webkit-details-marker { display: none; }
+  .result-card, .lar-card, article { break-inside: avoid; }
+  .print-only { display: block !important; }
+  .no-print { display: none !important; }
+}
+.print-only { display: none; }

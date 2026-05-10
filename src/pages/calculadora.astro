@@ -5,15 +5,8 @@ import Wizard from "~/components/Wizard";
 
 <Base
   title="Calculadora de apoios — lar-ajuda.pt"
-  description="Em 90 segundos, descubra todos os apoios sociais que pode pedir para o seu familiar idoso. Cálculo client-side."
+  description="Em 90 segundos, descubra todos os apoios sociais que pode pedir para o seu familiar idoso. Cálculo no seu browser; nada é enviado a servidores."
   canonicalPath="/calculadora"
 >
   <Wizard client:load />
 </Base>
-
-<style is:global>
-  @media print {
-    header, footer, .btn-primary, .btn-secondary { display: none !important; }
-    main { padding: 0 !important; }
-  }
-</style>

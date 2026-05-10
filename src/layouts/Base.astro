@@ -1,5 +1,6 @@
 ---
 import "~/styles/global.css";
+import { PLAUSIBLE_DOMAIN } from "astro:env/client";
 
 interface Props {
   title: string;
@@ -15,8 +16,25 @@ const {
   bodyClass = "",
 } = Astro.props;
 
-const site = "https://lar-ajuda.pt";
-const canonical = site + canonicalPath;
+const SITE = "https://lar-ajuda.pt";
+const canonical = SITE + canonicalPath;
+
+// Server-side mailto for "Reportar erro".
+//
+// SECURITY: build href from `Astro.url.pathname` only. NEVER from
+// `Astro.url.hash` or any client-side `location` value — the permalink
+// hash carries the user's wizard inputs (idade, pensão, dependência) and
+// emailing it would leak PII to gairifo@gmail.com without consent.
+//
+// Path is whitelisted to safe characters before interpolation.
+const safePath = /^\/[a-zA-Z0-9/_-]{0,80}$/.test(Astro.url.pathname)
+  ? Astro.url.pathname
+  : "/";
+const reportSubject = encodeURIComponent(`[lar-ajuda] Erro em ${safePath}`);
+const reportBody = encodeURIComponent(
+  `Página: ${SITE}${safePath}\n\nDescreva o problema:\n`
+);
+const reportMailto = `mailto:gairifo@gmail.com?subject=${reportSubject}&body=${reportBody}`;
 ---
 
 <!doctype html>
@@ -28,11 +46,20 @@ const canonical = site + canonicalPath;
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="pt-pt" href={canonical} />
+    <link rel="alternate" hreflang="x-default" href={canonical} />
+    <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
+
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="pt_PT" />
     <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="lar-ajuda.pt" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -40,19 +67,38 @@ const canonical = site + canonicalPath;
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+
+    {/* Page-composed structured data slot. Pages emit one or more
+        <script type="application/ld+json" slot="head-jsonld"> tags. */}
+    <slot name="head-jsonld" />
+
+    {/* Plausible — only emitted when PUBLIC_PLAUSIBLE_DOMAIN is set.
+        is:inline is REQUIRED in Astro 5 for conditionally-rendered
+        scripts; without it the conditional is compiled away. */}
+    {PLAUSIBLE_DOMAIN && (
+      <>
+        <script
+          is:inline
+          defer
+          data-domain={PLAUSIBLE_DOMAIN}
+          src="https://plausible.io/js/script.js"
+        />
+        <script is:inline>{`window.plausible=window.plausible||function(){(window.plausible.q=window.plausible.q||[]).push(arguments)}`}</script>
+      </>
+    )}
   </head>
   <body class={bodyClass}>
     <header class="border-b border-rule bg-white sticky top-0 z-30">
       <div class="max-w-5xl mx-auto px-5 py-3 flex items-center justify-between gap-4">
         <a href="/" class="flex items-center gap-2 no-underline text-ink font-bold text-lg">
-          <span class="inline-block w-7 h-7 rounded-md bg-brand-500"></span>
+          <span class="inline-block w-7 h-7 rounded-md bg-brand-500" aria-hidden="true"></span>
           <span>lar-ajuda<span class="text-brand-500">.pt</span></span>
         </a>
-        <nav class="flex items-center gap-2 text-sm">
-          <a href="/calculadora" class="px-3 py-2 rounded-md no-underline bg-brand-500 text-white font-semibold hover:bg-brand-600">Calculadora</a>
-          <a href="/apoios" class="hidden sm:inline px-3 py-2 rounded-md no-underline text-ink-muted hover:bg-brand-50">Apoios</a>
-          <a href="/formularios" class="hidden sm:inline px-3 py-2 rounded-md no-underline text-ink-muted hover:bg-brand-50">Formulários</a>
-          <a href="/sobre" class="hidden sm:inline px-3 py-2 rounded-md no-underline text-ink-muted hover:bg-brand-50">Sobre</a>
+        <nav class="flex items-center gap-2 text-sm" aria-label="Navegação principal">
+          <a href="/calculadora" class="nav-link nav-cta px-3 py-2 rounded-md no-underline bg-brand-500 text-white font-semibold hover:bg-brand-600">Calculadora</a>
+          <a href="/apoios" class="nav-link hidden sm:inline px-3 py-2 rounded-md no-underline text-ink-muted hover:bg-brand-50">Apoios</a>
+          <a href="/formularios" class="nav-link hidden sm:inline px-3 py-2 rounded-md no-underline text-ink-muted hover:bg-brand-50">Formulários</a>
+          <a href="/sobre" class="nav-link hidden sm:inline px-3 py-2 rounded-md no-underline text-ink-muted hover:bg-brand-50">Sobre</a>
         </nav>
       </div>
     </header>
@@ -83,9 +129,48 @@ const canonical = site + canonicalPath;
           <a class="block text-slate-300 no-underline hover:text-white" href="https://github.com/" target="_blank" rel="noopener">Código no GitHub</a>
         </div>
       </div>
+
+      <div
+        class="max-w-5xl mx-auto px-5 pb-4 text-xs text-slate-500 flex flex-wrap items-center gap-3 justify-center"
+        data-error-context={JSON.stringify({
+          page: safePath,
+          constants_year: 2026,
+        })}
+      >
+        <a class="text-slate-300 no-underline hover:text-white" href={reportMailto}>
+          Reportar erro nesta página
+        </a>
+        <span aria-hidden="true">·</span>
+        <button
+          type="button"
+          id="copy-error-email"
+          class="text-slate-300 no-underline hover:text-white bg-transparent border-0 cursor-pointer"
+        >
+          Copiar email
+        </button>
+      </div>
+
       <div class="border-t border-slate-800 text-center text-xs text-slate-500 py-4 px-5">
         Dados de referência: DGSS, Autoridade Tributária, Portaria 480/2025. Atualizado para 2026.
       </div>
     </footer>
+
+    <script is:inline>
+      (function () {
+        var btn = document.getElementById("copy-error-email");
+        if (!btn) return;
+        btn.addEventListener("click", function () {
+          var email = "gairifo@gmail.com";
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(email).then(
+              function () { btn.textContent = "Copiado!"; setTimeout(function () { btn.textContent = "Copiar email"; }, 1800); },
+              function () { btn.textContent = email; }
+            );
+          } else {
+            btn.textContent = email;
+          }
+        });
+      })();
+    </script>
   </body>
 </html>
