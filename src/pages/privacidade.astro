@@ -15,22 +15,69 @@ import Base from "~/layouts/Base.astro";
       idade, pensão, dependência, atestado, situação atual — nunca saem do seu dispositivo.
     </p>
 
-    <h2 class="text-xl font-bold mt-6 mb-2">O que recolhemos</h2>
-    <ul class="text-ink-muted list-disc pl-5 space-y-1 mb-3">
-      <li>Estatísticas agregadas de uso via Plausible (sem cookies, sem identificação).</li>
-      <li>Nada mais.</li>
-    </ul>
-
-    <h2 class="text-xl font-bold mt-6 mb-2">Phase 2 (futuro)</h2>
+    <h2 class="text-xl font-bold mt-6 mb-2">Análise de uso</h2>
+    <p class="text-ink-muted mb-2">
+      Usamos o <strong>Plausible Analytics</strong> (alojado na União Europeia) para perceber
+      que páginas são úteis. O Plausible <strong>não usa cookies, não escreve no
+      <em>localStorage</em>, não faz <em>fingerprinting</em></strong> e não recolhe dados pessoais
+      identificáveis. Não é necessário consentimento ao abrigo do art.º 5.º da Lei 41/2004
+      nem do RGPD para esta utilização.
+    </p>
     <p class="text-ink-muted mb-3">
-      Quando ativarmos o módulo de comparação de preços de lares, poderá <em>opcionalmente</em>
-      partilhar (anonimamente) o preço que paga. É uma escolha sua, separada da calculadora,
-      e nunca contém dados pessoais.
+      Eventos personalizados que registamos: número de cálculos completados, número de links
+      partilhados, número de links inválidos abertos. Nenhum carrega valores das suas respostas.
+    </p>
+
+    <h2 class="text-xl font-bold mt-6 mb-2">Links partilháveis (permalinks)</h2>
+    <p class="text-ink-muted mb-2">
+      Quando carrega em <em>Copiar link</em>, os dados que introduziu (idade, pensão,
+      dependência, situação atual) são codificados na parte do URL após o símbolo
+      <code>#</code> — chamada <em>fragmento</em>. <strong>O fragmento nunca é enviado a
+      servidores</strong>: nem ao nosso, nem ao Plausible, nem a qualquer site para o qual
+      o link aponte. Esta é uma propriedade do protocolo HTTP (RFC 7231).
+    </p>
+    <p class="text-ink-muted mb-2">
+      Mas, ao partilhar o link, está a partilhar esses dados com quem o receber. Tenha em conta:
+    </p>
+    <ul class="text-ink-muted list-disc pl-5 space-y-1 mb-3">
+      <li>O <strong>histórico do navegador</strong> guarda o URL completo (incluindo o
+        fragmento) por tempo indefinido em dispositivos partilhados.</li>
+      <li>Capturas de ecrã e o PDF impresso (que inclui o link) também contêm os mesmos
+        dados — trate-os com o mesmo cuidado que trataria do link.</li>
+      <li>A <em>área de transferência</em> (clipboard) pode sincronizar entre os seus
+        dispositivos via iCloud (Mac/iPhone) ou área de transferência da nuvem
+        do Windows.</li>
+      <li>O menu <em>Partilhar</em> dos telemóveis pode enviar o link para WhatsApp,
+        Telegram, e-mail, etc. — qualquer pessoa com o link verá o resultado.</li>
+    </ul>
+    <p class="text-ink-muted mb-3">
+      Use links de calculadora apenas com pessoas em quem confia (família, médico,
+      assistente social).
+    </p>
+
+    <h2 class="text-xl font-bold mt-6 mb-2">"Reportar erro"</h2>
+    <p class="text-ink-muted mb-3">
+      Quando carrega em <em>Reportar erro nesta página</em> abre-se o seu cliente de e-mail
+      com a página identificada. <strong>Não incluímos os dados que introduziu na calculadora
+      nem o seu permalink no e-mail</strong>. Se quiser partilhá-los para diagnóstico, pode
+      colá-los manualmente.
     </p>
 
     <h2 class="text-xl font-bold mt-6 mb-2">Direitos RGPD</h2>
-    <p class="text-ink-muted">
-      Não recolhemos dados pessoais identificáveis, pelo que não há informação para aceder, retificar ou apagar.
+    <p class="text-ink-muted mb-3">
+      Não recolhemos dados pessoais identificáveis, pelo que não há informação para aceder,
+      retificar ou apagar. Se acreditar que algum dado seu chegou aos nossos servidores,
+      escreva para <a href="mailto:gairifo@gmail.com">gairifo@gmail.com</a>.
     </p>
+
+    <h2 class="text-xl font-bold mt-6 mb-2">Sub-processadores</h2>
+    <ul class="text-ink-muted list-disc pl-5 space-y-1 mb-3">
+      <li><strong>Plausible Analytics</strong> (Plausible Insights, OÜ) — análise de uso
+        agregada, sem identificadores. Servidores na UE.</li>
+      <li><strong>Cloudflare Pages</strong> ou <strong>Vercel</strong> (fornecedor a confirmar)
+        — alojamento estático.</li>
+      <li><strong>Google Fonts</strong> — tipo de letra. Pode ser auto-alojado em versões
+        futuras para eliminar este pedido.</li>
+    </ul>
   </article>
 </Base>

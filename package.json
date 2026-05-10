@@ -7,7 +7,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "tsx scripts/emit-schema.ts && astro build",
+    "schema:emit": "tsx scripts/emit-schema.ts",
     "preview": "astro preview",
     "check": "astro check",
     "test": "vitest run",
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   }

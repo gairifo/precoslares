@@ -1,5 +1,6 @@
 ---
 import Base from "~/layouts/Base.astro";
+import { safeJsonForScript } from "~/lib/safe-json";
 
 const apoios = [
   "Complemento por Dependência (1.º e 2.º grau)",
@@ -24,6 +25,29 @@ const cards = [
   { i: "📄", t: "Formulários e próximos passos", d: "Cada estimativa diz qual o formulário, onde entregar e o tempo de resposta esperado." },
   { i: "🔒", t: "Sem dados, sem registo", d: "A calculadora corre no seu browser. Nada é enviado a servidores. Sem registo, sem newsletter." },
 ];
+
+const SITE = "https://lar-ajuda.pt";
+const homeJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE}#org`,
+      name: "lar-ajuda.pt",
+      url: SITE,
+      description:
+        "Ferramenta pública e independente. Calculadora de apoios sociais para idosos em Portugal. Sem fins lucrativos.",
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE}#website`,
+      url: SITE,
+      name: "lar-ajuda.pt",
+      inLanguage: "pt-PT",
+      publisher: { "@id": `${SITE}#org` },
+    },
+  ],
+};
 ---
 
 <Base
@@ -31,6 +55,12 @@ const cards = [
   description="Saiba que apoios pode receber para ajudar com o lar do seu familiar. Calculadora pública, neutra, sem encaminhamento para lares."
   canonicalPath="/"
 >
+  <script
+    slot="head-jsonld"
+    type="application/ld+json"
+    set:html={safeJsonForScript(homeJsonLd)}
+  />
+
   <section class="text-center max-w-3xl mx-auto py-8 sm:py-14">
     <p class="text-sm uppercase tracking-wider text-brand-500 font-semibold mb-3">
       Calculadora pública · 2026
