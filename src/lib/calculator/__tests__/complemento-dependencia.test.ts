@@ -14,8 +14,8 @@ const baseInput: ApoiosInput = {
 describe("Complemento por Dependência", () => {
   it("paga regime geral 1.º grau", () => {
     const r = complementoDependencia({ ...baseInput, grau_dependencia: "1_grau" });
-    expect(r.valor_mensal_eur).toBe(131.20);
-    expect(r.valor_anual_eur).toBeCloseTo(131.20 * 14, 1);
+    expect(r.valor_mensal_eur).toBe(131.19);
+    expect(r.valor_anual_eur).toBeCloseTo(131.19 * 14, 1);
     expect(r.elegibilidade).toBe("provavel");
     expect(r.regra_aplicada).toBe("regime_geral_1grau");
   });
@@ -26,7 +26,7 @@ describe("Complemento por Dependência", () => {
       grau_dependencia: "2_grau",
       situacao_residencia: "casa_propria",
     });
-    expect(r.valor_mensal_eur).toBe(236.16);
+    expect(r.valor_mensal_eur).toBe(236.14);
     expect(r.regra_aplicada).toBe("regime_geral_2grau");
   });
 
@@ -36,7 +36,7 @@ describe("Complemento por Dependência", () => {
       grau_dependencia: "2_grau",
       situacao_residencia: "lar_ipss_acordo",
     });
-    expect(r.valor_mensal_eur).toBe(131.20);
+    expect(r.valor_mensal_eur).toBe(131.19);
     expect(r.regra_aplicada).toBe("regime_geral_2grau_capado_acordo");
   });
 

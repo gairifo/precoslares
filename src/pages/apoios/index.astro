@@ -1,37 +1,98 @@
 ---
+import { getCollection } from "astro:content";
 import Base from "~/layouts/Base.astro";
+import { APOIO_IDS } from "~/content.config";
 
-const apoios = [
-  { slug: "complemento-dependencia", nome: "Complemento por Dependência", t: "Mensal, pago pela Segurança Social a pensionistas com 1.º ou 2.º grau de dependência reconhecidos pelo SVI. Pago em 14 mensalidades." },
-  { slug: "csi", nome: "Complemento Solidário para Idosos (CSI)", t: "Apoio mensal a pensionistas com 66+ anos e baixos rendimentos. Inclui benefícios extra (medicamentos gratuitos, próteses, óculos, transportes)." },
-  { slug: "erpi-acordo", nome: "Comparticipação SS para ERPI", t: "Vaga subsidiada num lar IPSS / Misericórdia. A SS paga uma parte; a família paga uma comparticipação proporcional ao rendimento." },
-  { slug: "irs-art-84", nome: "IRS — Encargos com lares (Art. 84º)", t: "Dedução à coleta de 25% das despesas com lar / apoio domiciliário, com limite anual de €403,75." },
-  { slug: "irs-art-87", nome: "IRS — Pessoa com deficiência (Art. 87º)", t: "Dedução fixa de €1 343 (2,5 × IAS) para grau de incapacidade ≥ 60% no atestado multiusos. €2 149 adicional para grau ≥ 90%." },
-  { slug: "adse-iasfa-sad", nome: "ADSE / IASFA / SAD-PSP", t: "Comparticipação em lar / apoio domiciliário para beneficiários de subsistemas (função pública, militar, polícia)." },
-  { slug: "apoios-municipais", nome: "Apoios municipais", t: "Subsídios próprios da Câmara Municipal para idosos dependentes. Frequentemente sub-reclamados." },
-  { slug: "cuidador-informal", nome: "Subsídio do Cuidador Informal", t: "Pago ao cuidador familiar reconhecido. Apenas se o idoso permanecer em casa." },
-];
+// Authored deep-dives queried from the Content Collection.
+const authored = await getCollection("apoios");
+const authoredIds = new Set(authored.map((e) => e.id));
+
+// "Em breve" stubs — apoios ainda sem deep-dive page mas que aparecem
+// no resultado da calculadora.
+const STUBS: Record<string, { nome: string; t: string }> = {
+  "irs-art-84": {
+    nome: "IRS — Encargos com lares (Art. 84º)",
+    t: "Dedução à colecta de 25% das despesas com lar / apoio domiciliário, com limite anual de €403,75.",
+  },
+  "irs-art-87": {
+    nome: "IRS — Pessoa com deficiência (Art. 87º)",
+    t: "Dedução fixa de €1.342,83 (2,5 × IAS) para grau de incapacidade ≥ 60%. €2.148,52 adicional para grau ≥ 90%.",
+  },
+  "erpi-acordo": {
+    nome: "Comparticipação SS para ERPI",
+    t: "Vaga subsidiada num lar IPSS / Misericórdia. A SS paga uma parte; a família paga uma comparticipação proporcional ao rendimento.",
+  },
+  "adse-iasfa-sad": {
+    nome: "ADSE / IASFA / SAD-PSP",
+    t: "Comparticipação em lar / apoio domiciliário para beneficiários de subsistemas (função pública, militar, polícia).",
+  },
+  "cuidador-informal": {
+    nome: "Subsídio do Cuidador Informal",
+    t: "Pago ao cuidador familiar reconhecido. Apenas se o idoso permanecer em casa.",
+  },
+  "apoios-municipais": {
+    nome: "Apoios municipais",
+    t: "Subsídios próprios da Câmara Municipal para idosos dependentes. Frequentemente sub-reclamados.",
+  },
+};
+
+const stubsToRender = APOIO_IDS.filter(
+  (id) => !authoredIds.has(id) && STUBS[id]
+);
+
+// Sort authored entries by lastUpdated descending
+const authoredSorted = authored.sort(
+  (a, b) => b.data.lastUpdated.getTime() - a.data.lastUpdated.getTime()
+);
 ---
 
 <Base
-  title="Glossário de apoios — precoslares.pt"
-  description="Os 8 principais apoios sociais para idosos em Portugal, explicados em linguagem simples."
+  title="Glossário de apoios para idosos em Portugal — precoslares.pt"
+  description="Os 8 principais apoios sociais para idosos em Portugal, explicados em linguagem simples. CSI, complemento por dependência, atestado multiusos, dedução IRS e mais."
   canonicalPath="/apoios"
 >
   <section class="max-w-3xl mx-auto">
     <p class="text-sm uppercase tracking-wider text-brand-500 font-semibold mb-2">Glossário</p>
     <h1 class="text-3xl sm:text-4xl font-bold mb-3">Os apoios sociais para idosos</h1>
     <p class="text-ink-muted mb-8">
-      O sistema português oferece vários apoios — sociais, fiscais, em vagas comparticipadas, em formação. Cada apoio tem regras próprias.
-      Em vez de os ler todos, use a <a href="/calculadora">calculadora</a>: ela aplica todas as regras de uma vez.
+      O sistema português oferece vários apoios — sociais, fiscais, em vagas comparticipadas. Cada apoio tem regras próprias.
+      Em vez de os ler todos, use a <a href="/calculadora">calculadora</a>: aplica todas as regras de uma vez.
     </p>
-    <div class="space-y-4">
-      {apoios.map((a) => (
-        <article class="bg-white border border-rule rounded-xl p-5">
-          <h2 class="text-lg font-bold mb-1">{a.nome}</h2>
-          <p class="text-sm text-ink-muted">{a.t}</p>
-        </article>
+
+    <h2 class="text-xl font-bold mb-3">Guias detalhados</h2>
+    <div class="space-y-4 mb-10">
+      {authoredSorted.map((entry) => (
+        <a
+          href={`/apoios/${entry.id}`}
+          class="block bg-white border border-rule rounded-xl p-5 hover:border-brand-100 hover:shadow-sm transition no-underline"
+        >
+          <h3 class="text-lg font-bold mb-1 text-ink">{entry.data.h1}</h3>
+          <p class="text-sm text-ink-muted mb-2">{entry.data.description}</p>
+          <p class="text-xs text-ink-soft">
+            {entry.data.readingMinutes} min de leitura · valores de {entry.data.iasYear}
+          </p>
+        </a>
       ))}
     </div>
+
+    {stubsToRender.length > 0 && (
+      <>
+        <h2 class="text-xl font-bold mb-3">Em breve</h2>
+        <p class="text-ink-muted text-sm mb-3">
+          Estes apoios estão cobertos pela calculadora; os guias detalhados chegam ao longo de 2026.
+        </p>
+        <div class="space-y-3">
+          {stubsToRender.map((id) => (
+            <article class="bg-white border border-rule rounded-xl p-5 opacity-80">
+              <div class="flex items-center justify-between gap-3 mb-1">
+                <h3 class="text-base font-bold">{STUBS[id].nome}</h3>
+                <span class="text-xs uppercase tracking-wide text-ink-soft">Em breve</span>
+              </div>
+              <p class="text-sm text-ink-muted">{STUBS[id].t}</p>
+            </article>
+          ))}
+        </div>
+      </>
+    )}
   </section>
 </Base>

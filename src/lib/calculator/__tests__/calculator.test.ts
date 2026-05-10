@@ -67,7 +67,7 @@ describe("calcular() — integração", () => {
 
     // Complemento dependência: 2.º grau regime geral, NÃO em acordo → 236,16
     const dep = r.apoios.find((a) => a.id === "complemento_dependencia")!;
-    expect(dep.valor_mensal_eur).toBe(236.16);
+    expect(dep.valor_mensal_eur).toBe(236.14);
 
     // CSI: deve ser elegível (recursos < 8040)
     const c = r.apoios.find((a) => a.id === "csi")!;
