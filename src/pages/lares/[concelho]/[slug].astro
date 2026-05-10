@@ -1,0 +1,183 @@
+---
+import Base from "~/layouts/Base.astro";
+import { safeJsonForScript } from "~/lib/safe-json";
+import {
+  getAllLares,
+  getLarBySlug,
+  getConcelho,
+  tipoLabel,
+  valenciaLabel,
+} from "~/lib/lares";
+
+export async function getStaticPaths() {
+  return getAllLares().map((lar) => ({
+    params: { concelho: lar.concelhoSlug, slug: lar.slug },
+    props: { lar },
+  }));
+}
+
+const { lar } = Astro.props;
+const concelho = getConcelho(lar.concelhoSlug);
+if (!concelho) throw new Error(`Lar ${lar.slug} references unknown concelho ${lar.concelhoSlug}`);
+
+const SITE = "https://precoslares.pt";
+const url = `${SITE}/lares/${concelho.slug}/${lar.slug}`;
+
+const localBusinessLd: Record<string, unknown> = {
+  "@type": ["LocalBusiness", "ResidentialCare"],
+  "@id": `${url}#business`,
+  name: lar.nome,
+  url,
+  inLanguage: "pt-PT",
+};
+if (lar.morada || concelho.nome) {
+  localBusinessLd.address = {
+    "@type": "PostalAddress",
+    streetAddress: lar.morada,
+    postalCode: lar.codigoPostal,
+    addressLocality: lar.freguesia ?? concelho.nome,
+    addressRegion: concelho.nome,
+    addressCountry: "PT",
+  };
+}
+if (lar.telefone) localBusinessLd.telephone = lar.telefone;
+if (lar.email) localBusinessLd.email = lar.email;
+if (lar.website) localBusinessLd.sameAs = [lar.website];
+if (lar.preco?.min != null && lar.preco?.max != null) {
+  localBusinessLd.priceRange = `€${lar.preco.min}–€${lar.preco.max}/mês`;
+}
+
+const ld = {
+  "@context": "https://schema.org",
+  "@graph": [
+    localBusinessLd,
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Início", item: `${SITE}/` },
+        { "@type": "ListItem", position: 2, name: "Lares", item: `${SITE}/lares` },
+        { "@type": "ListItem", position: 3, name: concelho.nome, item: `${SITE}/lares/${concelho.slug}` },
+        { "@type": "ListItem", position: 4, name: lar.nome },
+      ],
+    },
+  ],
+};
+
+const tipoLabelText = tipoLabel(lar.tipo);
+const sourceLabel: Record<string, string> = {
+  operator_published: "publicado pelo operador",
+  user_reported: "reportado por famílias",
+  estimated: "estimado a partir da mediana do concelho",
+};
+---
+
+<Base
+  title={`${lar.nome} — ${concelho.nome} — preços, contactos, tipo de lar — precoslares.pt`}
+  description={`${lar.nome} (${tipoLabelText}) em ${concelho.nome}. ${lar.preco?.min && lar.preco?.max ? `Preço €${lar.preco.min}–€${lar.preco.max}/mês.` : ""} ${lar.acordoSS ? "Tem acordo com a Segurança Social." : "Sem acordo com a Segurança Social."}`}
+  canonicalPath={`/lares/${concelho.slug}/${lar.slug}`}
+>
+  <script
+    slot="head-jsonld"
+    type="application/ld+json"
+    set:html={safeJsonForScript(ld)}
+  />
+
+  <article class="max-w-3xl mx-auto">
+    <nav class="text-xs text-ink-soft mb-3">
+      <a href="/" class="no-underline hover:underline">Início</a>
+      <span aria-hidden="true"> · </span>
+      <a href="/lares" class="no-underline hover:underline">Lares</a>
+      <span aria-hidden="true"> · </span>
+      <a href={`/lares/${concelho.slug}`} class="no-underline hover:underline">{concelho.nome}</a>
+      <span aria-hidden="true"> · </span>
+      <span>{lar.nome}</span>
+    </nav>
+
+    <header class="mb-6">
+      <div class="flex flex-wrap items-center gap-2 mb-2">
+        <span class={`chip badge-elig-${lar.tipo === "privado" ? "possivel" : "provavel"}`}>{tipoLabelText}</span>
+        {lar.acordoSS && (
+          <span class="chip badge-elig-certa">Acordo Segurança Social</span>
+        )}
+      </div>
+      <h1 class="text-3xl sm:text-4xl font-bold mb-2 leading-tight">{lar.nome}</h1>
+      <p class="text-ink-muted">
+        {lar.freguesia && `${lar.freguesia}, `}{concelho.nome}
+      </p>
+    </header>
+
+    {lar.preco?.min != null && lar.preco?.max != null && (
+      <section class="bg-brand-50 border border-brand-100 rounded-xl p-5 mb-6">
+        <p class="text-xs uppercase tracking-wide text-brand-700 font-semibold mb-1">
+          Mensalidade
+        </p>
+        <p class="text-3xl font-bold text-brand-500 tabular-nums mb-1">
+          €{lar.preco.min}–€{lar.preco.max}<span class="text-base text-ink-muted">/mês</span>
+        </p>
+        <p class="text-xs text-ink-muted">
+          Valor {sourceLabel[lar.preco.source ?? "estimated"]}.
+          {lar.preco.asOf && ` Última verificação: ${lar.preco.asOf}.`}
+        </p>
+      </section>
+    )}
+
+    {lar.preco == null && (
+      <section class="banner banner-warn mb-6">
+        <span>
+          Ainda não temos preço confirmado para este lar.
+          {" "}<a href="/calculadora" class="font-semibold">Se conhece este lar e o seu preço, partilhe anonimamente</a>{" "}
+          completando a calculadora.
+        </span>
+      </section>
+    )}
+
+    <section class="bg-white border border-rule rounded-xl p-5 mb-6">
+      <h2 class="text-base font-bold mb-3">Sobre este lar</h2>
+      <dl class="space-y-2 text-sm">
+        <div class="flex gap-3"><dt class="w-32 text-ink-soft">Tipo</dt><dd class="font-medium">{tipoLabelText}</dd></div>
+        <div class="flex gap-3"><dt class="w-32 text-ink-soft">Acordo SS</dt><dd class="font-medium">{lar.acordoSS ? "Sim" : "Não"}</dd></div>
+        <div class="flex gap-3"><dt class="w-32 text-ink-soft">Valências</dt><dd class="font-medium">{lar.valencias.map(valenciaLabel).join(", ")}</dd></div>
+        {lar.capacidade != null && (
+          <div class="flex gap-3"><dt class="w-32 text-ink-soft">Capacidade</dt><dd class="font-medium">{lar.capacidade} camas</dd></div>
+        )}
+        {lar.morada && (
+          <div class="flex gap-3"><dt class="w-32 text-ink-soft">Morada</dt><dd class="font-medium">{lar.morada}{lar.codigoPostal && `, ${lar.codigoPostal}`}</dd></div>
+        )}
+        {lar.telefone && (
+          <div class="flex gap-3"><dt class="w-32 text-ink-soft">Telefone</dt><dd class="font-medium"><a href={`tel:${lar.telefone.replace(/\s/g, "")}`}>{lar.telefone}</a></dd></div>
+        )}
+        {lar.email && (
+          <div class="flex gap-3"><dt class="w-32 text-ink-soft">Email</dt><dd class="font-medium"><a href={`mailto:${lar.email}`}>{lar.email}</a></dd></div>
+        )}
+        {lar.website && (
+          <div class="flex gap-3"><dt class="w-32 text-ink-soft">Website</dt><dd class="font-medium"><a href={lar.website} target="_blank" rel="noopener nofollow">{lar.website.replace(/^https?:\/\//, "")}</a></dd></div>
+        )}
+      </dl>
+    </section>
+
+    {lar.notas && lar.notas.length > 0 && (
+      <section class="bg-white border border-rule rounded-xl p-5 mb-6">
+        <h2 class="text-base font-bold mb-2">Notas</h2>
+        <ul class="text-sm text-ink-muted list-disc pl-5 space-y-1">
+          {lar.notas.map((n) => <li>{n}</li>)}
+        </ul>
+      </section>
+    )}
+
+    <section class="bg-brand-500 text-white rounded-2xl p-6 text-center">
+      <h2 class="text-lg font-bold mb-2">Quanto vai pagar de facto?</h2>
+      <p class="text-sm opacity-90 mb-4">
+        Use a calculadora para descontar os apoios públicos da mensalidade — em IPSS / Misericórdia,
+        a comparticipação familiar pode ser metade ou menos do preço de tabela.
+      </p>
+      <a href="/calculadora" class="inline-flex items-center gap-2 bg-white text-brand-500 font-semibold px-5 py-2.5 rounded-lg no-underline">
+        Calcular apoios →
+      </a>
+    </section>
+
+    <p class="text-xs text-ink-soft text-center mt-8">
+      Os dados deste lar são <strong>{lar.source === "seeded" ? "uma seleção curada inicial" : lar.source === "operator_claim" ? "verificados pelo operador" : "importados da Carta Social"}</strong>.
+      Algo errado? <a href={`mailto:gairifo@gmail.com?subject=${encodeURIComponent(`[precoslares] Correção em /lares/${concelho.slug}/${lar.slug}`)}`}>Reportar correção</a>.
+    </p>
+  </article>
+</Base>

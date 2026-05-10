@@ -1,0 +1,159 @@
+---
+import Base from "~/layouts/Base.astro";
+import { safeJsonForScript } from "~/lib/safe-json";
+import { getRoutedConcelhos, getLaresByConcelho, getConcelho, tipoLabel, valenciaLabel } from "~/lib/lares";
+
+export async function getStaticPaths() {
+  return getRoutedConcelhos().map((c) => ({
+    params: { concelho: c.slug },
+    props: { concelho: c },
+  }));
+}
+
+const { concelho } = Astro.props;
+const lares = getLaresByConcelho(concelho.slug);
+
+const SITE = "https://precoslares.pt";
+const url = `${SITE}/lares/${concelho.slug}`;
+
+const ipssCount = lares.filter((l) => l.tipo === "ipss" || l.tipo === "misericordia").length;
+const privadoCount = lares.filter((l) => l.tipo === "privado").length;
+const comAcordoCount = lares.filter((l) => l.acordoSS).length;
+
+const prices = lares
+  .filter((l) => l.preco?.min != null && l.preco?.max != null)
+  .map((l) => ({ min: l.preco!.min!, max: l.preco!.max! }));
+const precoMin = prices.length ? Math.min(...prices.map((p) => p.min)) : null;
+const precoMax = prices.length ? Math.max(...prices.map((p) => p.max)) : null;
+
+const ld = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "CollectionPage",
+      "@id": `${url}#page`,
+      name: `Lares de idosos em ${concelho.nome}`,
+      description: `Lares no concelho de ${concelho.nome}, com preços, tipo e acordo com a Segurança Social.`,
+      inLanguage: "pt-PT",
+      isPartOf: { "@id": `${SITE}#website` },
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Início", item: `${SITE}/` },
+        { "@type": "ListItem", position: 2, name: "Lares", item: `${SITE}/lares` },
+        { "@type": "ListItem", position: 3, name: concelho.nome },
+      ],
+    },
+  ],
+};
+
+const titlePrefix = lares.length > 0
+  ? `${lares.length} lar${lares.length === 1 ? "" : "es"} de idosos em ${concelho.nome}`
+  : `Lares de idosos em ${concelho.nome}`;
+---
+
+<Base
+  title={`${titlePrefix} — preços e diretório — precoslares.pt`}
+  description={lares.length > 0
+    ? `${lares.length} lares em ${concelho.nome}: ${ipssCount} IPSS/Misericórdia + ${privadoCount} privado${privadoCount === 1 ? "" : "s"}. ${precoMin && precoMax ? `Preços de €${precoMin} a €${precoMax}/mês.` : ""}`
+    : `Lares de idosos no concelho de ${concelho.nome}. Diretório em construção; partilhe um preço anonimamente para nos ajudar a crescer.`}
+  canonicalPath={`/lares/${concelho.slug}`}
+>
+  <script
+    slot="head-jsonld"
+    type="application/ld+json"
+    set:html={safeJsonForScript(ld)}
+  />
+
+  <section class="max-w-3xl mx-auto">
+    <nav class="text-xs text-ink-soft mb-3">
+      <a href="/" class="no-underline hover:underline">Início</a>
+      <span aria-hidden="true"> · </span>
+      <a href="/lares" class="no-underline hover:underline">Lares</a>
+      <span aria-hidden="true"> · </span>
+      <span>{concelho.nome}</span>
+    </nav>
+
+    <p class="text-sm uppercase tracking-wider text-brand-500 font-semibold mb-2">
+      Concelho · {concelho.distritoSlug.split("-").map((w) => w[0]?.toUpperCase() + w.slice(1)).join(" ")}
+    </p>
+    <h1 class="text-3xl sm:text-4xl font-bold mb-3">
+      {lares.length > 0 ? `${lares.length} lar${lares.length === 1 ? "" : "es"} em ${concelho.nome}` : `Lares em ${concelho.nome}`}
+    </h1>
+
+    {lares.length > 0 ? (
+      <p class="text-ink-muted mb-6">
+        {[
+          ipssCount > 0 && `${ipssCount} IPSS / Misericórdia${ipssCount === 1 ? "" : "s"}`,
+          privadoCount > 0 && `${privadoCount} privado${privadoCount === 1 ? "" : "s"}`,
+          comAcordoCount > 0 && `${comAcordoCount} com acordo SS`,
+        ].filter(Boolean).join(" · ")}
+        {precoMin && precoMax && (
+          <>
+            {" "}· preços de <strong>€{precoMin} a €{precoMax}/mês</strong>
+          </>
+        )}.
+      </p>
+    ) : (
+      <div class="banner banner-info mb-6">
+        <span>
+          Ainda não temos lares confirmados em <strong>{concelho.nome}</strong>.
+          Esta página existe porque é uma das pesquisas mais frequentes em Portugal —
+          em breve teremos dados. Conhece um lar aqui? <a href={`mailto:gairifo@gmail.com?subject=${encodeURIComponent(`[precoslares] Adicionar lar em ${concelho.nome}`)}`}>Diga-nos</a>.
+        </span>
+      </div>
+    )}
+
+    {lares.length > 0 && (
+      <div class="space-y-3 mb-10">
+        {lares.map((lar) => (
+          <a
+            href={`/lares/${concelho.slug}/${lar.slug}`}
+            class="block bg-white border border-rule rounded-xl p-5 hover:border-brand-100 hover:shadow-sm transition no-underline"
+          >
+            <div class="flex items-start justify-between gap-3 mb-1">
+              <h2 class="text-lg font-bold text-ink leading-tight">{lar.nome}</h2>
+              <span class={`chip badge-elig-${lar.tipo === "privado" ? "possivel" : "provavel"} shrink-0`}>
+                {tipoLabel(lar.tipo)}
+              </span>
+            </div>
+            <p class="text-sm text-ink-muted mb-2">
+              {lar.valencias.map(valenciaLabel).join(" · ")}
+              {lar.freguesia && ` · ${lar.freguesia}`}
+            </p>
+            <div class="flex flex-wrap gap-3 text-xs">
+              {lar.acordoSS && (
+                <span class="text-brand-700 font-semibold">✓ Acordo SS</span>
+              )}
+              {lar.preco?.min != null && lar.preco?.max != null && (
+                <span class="tabular-nums">
+                  €{lar.preco.min}–€{lar.preco.max}/mês
+                  <span class="text-ink-soft">
+                    {" "}({
+                      lar.preco.source === "operator_published" ? "publicado" :
+                      lar.preco.source === "user_reported" ? "reportado" :
+                      "estimado"
+                    })
+                  </span>
+                </span>
+              )}
+              {lar.capacidade && (
+                <span class="text-ink-soft">{lar.capacidade} camas</span>
+              )}
+            </div>
+          </a>
+        ))}
+      </div>
+    )}
+
+    <section class="bg-brand-50 border border-brand-100 rounded-2xl p-5 mt-8">
+      <h2 class="text-base font-bold mb-2">Vai escolher um lar em {concelho.nome}?</h2>
+      <p class="text-sm text-ink-muted mb-3">
+        Use a calculadora para perceber, em 90 segundos, quanto pagaria de facto após os apoios da Segurança Social
+        (CSI, complemento por dependência, IRS Art. 84.º, ADSE).
+      </p>
+      <a href="/calculadora" class="btn-primary text-sm">Calcular os meus apoios →</a>
+    </section>
+  </section>
+</Base>

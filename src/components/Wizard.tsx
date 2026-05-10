@@ -3,6 +3,18 @@ import { calcular } from "~/lib/calculator";
 import { CONSTANTS_VERSION } from "~/lib/calculator/version";
 import { decode, encode, type DecodeResult } from "~/lib/permalink";
 import { Events, track } from "~/lib/analytics";
+import { CONCELHOS } from "~/lib/lares/concelhos";
+import { getAllLares, getLaresByConcelho } from "~/lib/lares";
+import {
+  SERVICOS_LABELS,
+  TENURE_LABELS,
+  TIPO_LABELS,
+  type LarReport,
+  type LarReportTipo,
+  type ServicoIncluido,
+  type TenureBand,
+} from "~/lib/report/types";
+import { isSubmissionConfigured, submitReport } from "~/lib/report/submit";
 import type {
   ApoioOutput,
   ApoiosInput,
@@ -32,6 +44,36 @@ type HydrationBanner =
   | { kind: "version_too_new" }
   | { kind: "constants_drift"; year: string };
 
+type ReportStatus =
+  | { kind: "idle" }
+  | { kind: "submitting" }
+  | { kind: "submitted" }
+  | { kind: "skipped"; reason: "no_consent" | "endpoint_disabled" | "incomplete" }
+  | { kind: "failed" };
+
+/** UI-side draft of the LarReport. concelho_slug + lar_tipo + monthly_price
+ *  derive from the calculator input; tenure / services / consent are
+ *  Branch-A-only. */
+interface ReportDraft {
+  lar_slug?: string;
+  lar_name_freetext?: string;
+  services_included: ServicoIncluido[];
+  tenure_band?: TenureBand;
+  consent_share: boolean;
+}
+
+const emptyReport: ReportDraft = {
+  services_included: [],
+  consent_share: true, // default ON per spec §3 Branch A.7
+};
+
+const ALL_SERVICOS: ServicoIncluido[] = [
+  "alimentacao", "fraldas", "medicamentos", "fisioterapia",
+  "cabeleireiro", "transporte", "quarto_privado", "lavandaria", "atividades",
+];
+
+const ALL_TENURE: TenureBand[] = ["lt_6m", "6m_to_1y", "1y_to_3y", "gt_3y"];
+
 const empty: ApoiosInput = {
   idade: 80,
   tipo_pensao: null,
@@ -59,6 +101,8 @@ export default function Wizard() {
   const [showOptional, setShowOptional] = useState(false);
   const [banner, setBanner] = useState<HydrationBanner>({ kind: "none" });
   const [toast, setToast] = useState<string | null>(null);
+  const [reportDraft, setReportDraft] = useState<ReportDraft>(emptyReport);
+  const [reportStatus, setReportStatus] = useState<ReportStatus>({ kind: "idle" });
 
   // Race guard: prevents StrictMode double-effect-fire and any future
   // parent re-mount from re-firing permalink_loaded.
@@ -157,6 +201,41 @@ export default function Wizard() {
     if (completedSession.checkAndSet()) {
       track(Events.CalculatorCompleted);
     }
+    // Fire-and-forget price report when user opted in AND it's a Branch A
+    // case AND endpoint is configured. Failures are silent at the user
+    // level — calculator result still renders.
+    maybeSubmitReport();
+  }
+
+  function maybeSubmitReport() {
+    if (!reportDraft.consent_share) {
+      setReportStatus({ kind: "skipped", reason: "no_consent" });
+      return;
+    }
+    if (!isSubmissionConfigured()) {
+      setReportStatus({ kind: "skipped", reason: "endpoint_disabled" });
+      return;
+    }
+    const built = buildReport(input, reportDraft);
+    if (!built) {
+      setReportStatus({ kind: "skipped", reason: "incomplete" });
+      return;
+    }
+    setReportStatus({ kind: "submitting" });
+    submitReport(built).then((res) => {
+      if (res.ok) {
+        setReportStatus({ kind: "submitted" });
+        track(Events.ReportSubmitted, {
+          concelho: built.concelho_slug,
+          tipo: built.lar_tipo,
+        });
+      } else if (res.kind === "disabled") {
+        setReportStatus({ kind: "skipped", reason: "endpoint_disabled" });
+      } else {
+        setReportStatus({ kind: "failed" });
+        track(Events.ReportFailed, { kind: res.kind });
+      }
+    });
   }
 
   function handleRestart() {
@@ -164,6 +243,8 @@ export default function Wizard() {
     setStage("stage1");
     setShowOptional(false);
     setBanner({ kind: "none" });
+    setReportDraft(emptyReport);
+    setReportStatus({ kind: "idle" });
     if (typeof window !== "undefined" && window.location.hash) {
       window.history.replaceState(null, "", window.location.pathname);
     }
@@ -195,6 +276,7 @@ export default function Wizard() {
         banner={banner}
         toast={toast}
         canCopy={hydratedRef.current}
+        reportStatus={reportStatus}
         onRestart={handleRestart}
         onCopyLink={handleCopyLink}
       />
@@ -361,27 +443,20 @@ export default function Wizard() {
       />
 
       {branchA && (
-        <>
-          <FieldNum
-            label="Mensalidade média paga (€/mês)"
-            value={input.mensalidade_lar}
-            onChange={(v) => set("mensalidade_lar", v)}
-            hint="Inclui mensalidade base + extras regulares."
-          />
-          <FieldText
-            label="Concelho do lar (slug)"
-            value={input.municipio}
-            onChange={(v) => set("municipio", v)}
-            hint="Ex: lisboa, porto, cascais. Opcional."
-          />
-        </>
+        <BranchAFields
+          input={input}
+          onSetInput={set}
+          report={reportDraft}
+          onSetReport={setReportDraft}
+        />
       )}
 
       {situacao === "procura_lar" && (
-        <FieldText
+        <FieldEnum<string>
           label="Em que concelho procura?"
           value={input.municipio}
           onChange={(v) => set("municipio", v)}
+          options={CONCELHOS.map((c) => ({ v: c.slug, l: c.nome }))}
         />
       )}
 
@@ -423,6 +498,191 @@ export default function Wizard() {
       </div>
     </StageShell>
   );
+}
+
+// ── Branch A field group (in-lar respondents) ──────────────────────────
+
+function BranchAFields({
+  input, onSetInput, report, onSetReport,
+}: {
+  input: ApoiosInput;
+  onSetInput: <K extends keyof ApoiosInput>(key: K, value: ApoiosInput[K]) => void;
+  report: ReportDraft;
+  onSetReport: (next: ReportDraft) => void;
+}) {
+  const concelhoSlug = input.municipio ?? "";
+  const laresInConcelho = concelhoSlug ? getLaresByConcelho(concelhoSlug) : [];
+
+  // Map situacao_residencia (engine input) → LarReport tipo
+  const tipoFromSituacao: LarReportTipo =
+    input.situacao_residencia === "lar_ipss_acordo" ? "ipss_com_acordo"
+    : input.situacao_residencia === "lar_ipss_sem_acordo" ? "ipss_sem_acordo"
+    : input.situacao_residencia === "lar_privado" ? "privado"
+    : "nao_sei";
+
+  const submissionConfigured = isSubmissionConfigured();
+
+  function toggleService(s: ServicoIncluido) {
+    const has = report.services_included.includes(s);
+    onSetReport({
+      ...report,
+      services_included: has
+        ? report.services_included.filter((x) => x !== s)
+        : [...report.services_included, s],
+    });
+  }
+
+  return (
+    <>
+      <FieldEnum<string>
+        label="Concelho do lar"
+        value={concelhoSlug || null}
+        onChange={(v) => {
+          onSetInput("municipio", v);
+          // Reset lar selection when concelho changes
+          if (v !== concelhoSlug) onSetReport({ ...report, lar_slug: undefined, lar_name_freetext: undefined });
+        }}
+        options={CONCELHOS.map((c) => ({ v: c.slug, l: c.nome }))}
+      />
+
+      {concelhoSlug && (
+        <div className="field">
+          <label htmlFor="lar-name">Nome do lar (opcional)</label>
+          <input
+            id="lar-name"
+            type="text"
+            list="lar-options"
+            value={report.lar_name_freetext ?? (report.lar_slug ? laresInConcelho.find((l) => l.slug === report.lar_slug)?.nome ?? "" : "")}
+            onChange={(e) => {
+              const typed = e.target.value;
+              const match = laresInConcelho.find((l) => l.nome === typed);
+              if (match) {
+                onSetReport({ ...report, lar_slug: match.slug, lar_name_freetext: undefined });
+              } else if (typed.length > 0) {
+                onSetReport({ ...report, lar_slug: undefined, lar_name_freetext: typed });
+              } else {
+                onSetReport({ ...report, lar_slug: undefined, lar_name_freetext: undefined });
+              }
+            }}
+            placeholder="Ex: Santa Casa da Misericórdia, Lar São José…"
+          />
+          <datalist id="lar-options">
+            {laresInConcelho.map((l) => (
+              <option key={l.slug} value={l.nome} />
+            ))}
+          </datalist>
+          <small>
+            Se aparece na lista, escolha. Se não, escreva o nome — vamos adicioná-lo ao diretório.
+          </small>
+        </div>
+      )}
+
+      <FieldNum
+        label="Mensalidade média paga (€/mês)"
+        value={input.mensalidade_lar}
+        onChange={(v) => onSetInput("mensalidade_lar", v)}
+        hint="Inclui mensalidade base + extras regulares (fraldas, fisioterapia, etc.)."
+      />
+
+      <fieldset className="field">
+        <legend className="text-sm font-semibold text-ink mb-2">O que está incluído na mensalidade?</legend>
+        <div className="grid grid-cols-2 gap-1.5">
+          {ALL_SERVICOS.map((s) => (
+            <label key={s} className="flex items-center gap-2 text-sm cursor-pointer">
+              <input
+                type="checkbox"
+                checked={report.services_included.includes(s)}
+                onChange={() => toggleService(s)}
+              />
+              <span>{SERVICOS_LABELS[s]}</span>
+            </label>
+          ))}
+        </div>
+        <small>Selecione tudo o que se aplica.</small>
+      </fieldset>
+
+      <fieldset className="field">
+        <legend className="text-sm font-semibold text-ink mb-2">Há quanto tempo está neste lar?</legend>
+        <div className="flex flex-wrap gap-2">
+          {ALL_TENURE.map((t) => (
+            <label key={t} className={`px-3 py-1.5 rounded-full border text-sm cursor-pointer ${report.tenure_band === t ? "bg-brand-500 text-white border-brand-500" : "bg-white border-rule"}`}>
+              <input
+                type="radio"
+                name="tenure"
+                value={t}
+                checked={report.tenure_band === t}
+                onChange={() => onSetReport({ ...report, tenure_band: t })}
+                className="sr-only"
+              />
+              {TENURE_LABELS[t]}
+            </label>
+          ))}
+        </div>
+        <small>Sinaliza a frescura dos dados de comparação.</small>
+      </fieldset>
+
+      <div className="field bg-brand-50 border border-brand-100 rounded-lg p-4 mt-2">
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={report.consent_share}
+            onChange={(e) => onSetReport({ ...report, consent_share: e.target.checked })}
+            className="mt-1"
+          />
+          <span className="text-sm">
+            <strong>Partilhar este preço, anonimamente, para ajudar outras famílias.</strong>
+            <br />
+            <span className="text-ink-muted text-xs">
+              Enviamos apenas: tipo de lar, concelho, mensalidade, serviços incluídos, tempo no lar.
+              Nunca enviamos a sua idade, pensão, dependência ou identificação.
+              {!submissionConfigured && (
+                <>
+                  {" "}<em>(submissão ainda não configurada — o opt-in fica registado para quando estiver.)</em>
+                </>
+              )}
+            </span>
+          </span>
+        </label>
+      </div>
+
+      {/* Hidden tipo derived from situacao — exposed for debugging */}
+      <input type="hidden" name="lar_tipo" value={tipoFromSituacao} />
+    </>
+  );
+}
+
+// ── Helpers: build LarReport from wizard state ─────────────────────────
+
+function buildReport(input: ApoiosInput, draft: ReportDraft): LarReport | null {
+  if (!input.municipio) return null;
+  if (input.mensalidade_lar == null || input.mensalidade_lar <= 0) return null;
+  if (!draft.tenure_band) return null;
+
+  const tipo: LarReportTipo =
+    input.situacao_residencia === "lar_ipss_acordo" ? "ipss_com_acordo"
+    : input.situacao_residencia === "lar_ipss_sem_acordo" ? "ipss_sem_acordo"
+    : input.situacao_residencia === "lar_privado" ? "privado"
+    : "nao_sei";
+
+  const dependenciaBand: LarReport["dependencia_band"] =
+    input.grau_dependencia === "2_grau" || (input.grau_incapacidade ?? 0) >= 60
+      ? "2_grau_ou_atestado_60_plus"
+      : input.grau_dependencia === "1_grau" || input.grau_dependencia === "nenhum"
+        ? "nenhum_ou_1_grau"
+        : "nao_avaliado";
+
+  return {
+    v: 1,
+    submitted_at: new Date().toISOString(),
+    concelho_slug: input.municipio,
+    lar_slug: draft.lar_slug,
+    lar_name_freetext: draft.lar_name_freetext,
+    lar_tipo: tipo,
+    monthly_price_eur: input.mensalidade_lar,
+    services_included: draft.services_included,
+    tenure_band: draft.tenure_band,
+    dependencia_band: dependenciaBand,
+  };
 }
 
 // ── Once-per-session flag (sessionStorage, SSR-safe) ────────────────────
@@ -576,12 +836,13 @@ function FieldBool({
 // ── Result view ─────────────────────────────────────────────────────────
 
 function ResultView({
-  result, banner, toast, canCopy, onRestart, onCopyLink,
+  result, banner, toast, canCopy, reportStatus, onRestart, onCopyLink,
 }: {
   result: ApoiosResult;
   banner: HydrationBanner;
   toast: string | null;
   canCopy: boolean;
+  reportStatus: ReportStatus;
   onRestart: () => void;
   onCopyLink: () => void;
 }) {
@@ -604,6 +865,23 @@ function ResultView({
             Este link foi gerado com valores de <strong>{banner.year}</strong>.
             A estimativa atual usa valores de <strong>{result.ano_referencia}</strong> —
             recomenda-se recalcular preenchendo de novo.
+          </span>
+        </div>
+      )}
+
+      {reportStatus.kind === "submitted" && (
+        <div className="banner banner-info">
+          <span>
+            <strong>Obrigada por contribuir.</strong> O seu reporte de preço (anónimo) entra na
+            mediana do concelho assim que tivermos pelo menos 10 reportes.
+          </span>
+        </div>
+      )}
+      {reportStatus.kind === "failed" && (
+        <div className="banner banner-warn">
+          <span>
+            Não foi possível enviar o seu reporte de preço — mas o seu cálculo está abaixo.
+            Tente partilhar mais tarde.
           </span>
         </div>
       )}

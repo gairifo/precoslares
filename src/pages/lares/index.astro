@@ -1,0 +1,113 @@
+---
+import Base from "~/layouts/Base.astro";
+import { safeJsonForScript } from "~/lib/safe-json";
+import { getConcelhoSummaries, META, getAllLares } from "~/lib/lares";
+import { TOP_CONCELHOS } from "~/lib/lares/concelhos";
+
+const summaries = getConcelhoSummaries().sort(
+  (a, b) => b.larCount - a.larCount || a.nome.localeCompare(b.nome)
+);
+const totalLares = getAllLares().length;
+
+const SITE = "https://precoslares.pt";
+const ld = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "@id": `${SITE}/lares#page`,
+  name: "Lares de idosos em Portugal — diretório por concelho",
+  description: "Diretório de lares de idosos em Portugal, organizado por concelho. Preços, tipo (IPSS / Misericórdia / privado), acordo com a Segurança Social.",
+  inLanguage: "pt-PT",
+  isPartOf: { "@id": `${SITE}#website` },
+};
+---
+
+<Base
+  title="Lares de idosos em Portugal — preços e diretório por concelho — precoslares.pt"
+  description="Encontre lares de idosos por concelho. Veja preços, tipo (IPSS, Misericórdia, privado) e se têm acordo com a Segurança Social. Diretório público e neutro."
+  canonicalPath="/lares"
+>
+  <script
+    slot="head-jsonld"
+    type="application/ld+json"
+    set:html={safeJsonForScript(ld)}
+  />
+
+  <section class="max-w-3xl mx-auto mb-10">
+    <p class="text-sm uppercase tracking-wider text-brand-500 font-semibold mb-2">Diretório</p>
+    <h1 class="text-3xl sm:text-4xl font-bold mb-3">Lares de idosos em Portugal</h1>
+    <p class="text-ink-muted text-base">
+      {totalLares} lares listados em {summaries.filter((s) => s.larCount > 0).length} concelhos.
+      Filtre por concelho, tipo (IPSS, Misericórdia, privado) e acordo com a Segurança Social.
+    </p>
+    <p class="text-sm text-ink-soft mt-3">
+      <strong>Nota:</strong> v0 é uma seleção curada manualmente a partir de fontes públicas (sites de IPSS,
+      tabelas oficiais, diretórios). A integração completa com a <a href="https://www.cartasocial.pt" target="_blank" rel="noopener">Carta Social</a>
+      (~2.700 equipamentos) está em curso. Se conhece um lar que não aparece, ou se é responsável por um,
+      <a href={`mailto:gairifo@gmail.com?subject=${encodeURIComponent("[precoslares] Adicionar lar")}`}>diga-nos</a>.
+    </p>
+  </section>
+
+  <section class="max-w-3xl mx-auto mb-12">
+    <h2 class="text-xl font-bold mb-4">Concelhos com lares listados</h2>
+    <div class="grid sm:grid-cols-2 gap-3">
+      {summaries.filter((s) => s.larCount > 0).map((s) => (
+        <a
+          href={`/lares/${s.slug}`}
+          class="block bg-white border border-rule rounded-xl p-4 hover:border-brand-100 hover:shadow-sm transition no-underline"
+        >
+          <div class="flex items-baseline justify-between gap-3 mb-1">
+            <h3 class="font-bold text-ink">{s.nome}</h3>
+            <span class="text-xs text-ink-soft">{s.larCount} lar{s.larCount === 1 ? "" : "es"}</span>
+          </div>
+          <p class="text-xs text-ink-muted">
+            {[
+              s.misericordiaCount > 0 && `${s.misericordiaCount} Misericórdia${s.misericordiaCount === 1 ? "" : "s"}`,
+              s.ipssCount > 0 && `${s.ipssCount} IPSS`,
+              s.privadoCount > 0 && `${s.privadoCount} privado${s.privadoCount === 1 ? "" : "s"}`,
+            ].filter(Boolean).join(" · ")}
+          </p>
+          {s.precoMin != null && s.precoMax != null && (
+            <p class="text-xs text-brand-500 mt-1 tabular-nums">
+              €{s.precoMin}–€{s.precoMax}/mês
+            </p>
+          )}
+        </a>
+      ))}
+    </div>
+  </section>
+
+  {summaries.some((s) => s.larCount === 0) && (
+    <section class="max-w-3xl mx-auto mb-12">
+      <h2 class="text-xl font-bold mb-3">Concelhos sem lares listados (em breve)</h2>
+      <p class="text-sm text-ink-muted mb-4">
+        Estes concelhos aparecem nas pesquisas mais frequentes mas ainda não têm lares confirmados no diretório.
+        Em breve, à medida que recebermos relatos via calculadora ou que façamos verificação de campo.
+      </p>
+      <div class="flex flex-wrap gap-2">
+        {summaries.filter((s) => s.larCount === 0).map((s) => (
+          <a
+            href={`/lares/${s.slug}`}
+            class="text-xs bg-white border border-rule rounded-full px-3 py-1.5 text-ink-muted hover:border-brand-100"
+          >
+            {s.nome}
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <section class="max-w-3xl mx-auto bg-brand-50 border border-brand-100 rounded-2xl p-6">
+    <h2 class="text-lg font-bold mb-2">Como sabemos os preços?</h2>
+    <ul class="text-sm text-ink-muted list-disc pl-5 space-y-2">
+      <li><strong>Preços publicados pelo operador</strong> (ex: tabelas oficiais de Misericórdias) — fonte primária, mais fiável.</li>
+      <li><strong>Reportes de famílias</strong> (anónimos, via calculadora) — agregados em mediana e percentis quando temos ≥ 10 reportes por concelho.</li>
+      <li><strong>Estimativa</strong> baseada na mediana do concelho ou tipo, quando não há dados específicos. Sinalizada como tal.</li>
+    </ul>
+    <p class="text-sm text-ink-muted mt-3">
+      Para que o seu lar tenha preço fiável, a melhor coisa que pode fazer é completar a calculadora
+      e <strong>partilhar o preço anonimamente</strong> no fim. Os dados sobre o seu familiar nunca saem do seu browser
+      — só o preço do lar (sem identificação) é enviado.
+    </p>
+    <a href="/calculadora" class="btn-primary mt-4 inline-flex">Calcular apoios e partilhar preço →</a>
+  </section>
+</Base>

@@ -21,6 +21,12 @@ export const Events = {
   /** Fires when a hash payload fails to decode (malformed, unknown version,
    *  validation failure). */
   PermalinkInvalid: "permalink_invalid",
+  /** Fires when a wizard submission opts in to share a lar/price report
+   *  AND the report is successfully POSTed to REPORT_ENDPOINT. */
+  ReportSubmitted: "report_submitted",
+  /** Fires when the user opts in but submission failed (network/4xx/5xx).
+   *  Helps Pedro detect a broken endpoint quickly. */
+  ReportFailed: "report_failed",
 } as const;
 
 export type EventName = (typeof Events)[keyof typeof Events];

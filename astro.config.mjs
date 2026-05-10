@@ -24,6 +24,16 @@ export default defineConfig({
         access: "public",
         optional: true,
       }),
+      // Optional. When unset, the wizard still works but the
+      // "Partilhar este preço anonimamente" submit becomes a noop
+      // (button shows "(submission desativada)"). Pedro configures
+      // a Cloudflare Worker / Vercel Edge Function / Formspree URL
+      // when ready to start collecting reports server-side.
+      REPORT_ENDPOINT: envField.string({
+        context: "client",
+        access: "public",
+        optional: true,
+      }),
     },
   },
   vite: {

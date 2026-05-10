@@ -55,6 +55,32 @@ import Base from "~/layouts/Base.astro";
       assistente social).
     </p>
 
+    <h2 class="text-xl font-bold mt-6 mb-2">Partilha de preço de lar (opcional)</h2>
+    <p class="text-ink-muted mb-2">
+      Se está num lar e marcar a opção <em>"Partilhar este preço, anonimamente, para ajudar outras famílias"</em>
+      no fim da calculadora, enviamos para o nosso servidor um relatório com:
+    </p>
+    <ul class="text-ink-muted list-disc pl-5 space-y-1 mb-3">
+      <li>Concelho do lar.</li>
+      <li>Nome do lar (se escolhido na lista) ou texto livre que escreveu.</li>
+      <li>Tipo de lar (IPSS com acordo / IPSS sem acordo / Misericórdia / privado / não sei).</li>
+      <li>Mensalidade aproximada que paga.</li>
+      <li>O que está incluído na mensalidade (lista de serviços).</li>
+      <li>Há quanto tempo está nesse lar (banda: &lt;6 meses, 6m-1a, 1-3a, &gt;3a).</li>
+      <li>Banda de dependência (sem grau exacto): "1.º grau ou nenhum" / "2.º grau ou atestado ≥ 60%".</li>
+      <li>Data e hora da submissão.</li>
+    </ul>
+    <p class="text-ink-muted mb-3">
+      <strong>Não enviamos:</strong> a sua idade exacta, o valor da pensão, o estado civil, o seu rendimento,
+      a percentagem do atestado, nem qualquer identificador pessoal. Não enviamos cookies nem fingerprint.
+      Os reportes são agregados em mediana e percentis quando temos pelo menos 10 por concelho — o seu
+      reporte individual nunca aparece publicado em separado.
+    </p>
+    <p class="text-ink-muted mb-3">
+      O opt-in é por defeito ativo mas pode desligá-lo a qualquer momento, antes de carregar em <em>Calcular</em>.
+      O cálculo de apoios funciona exactamente da mesma maneira com ou sem partilha.
+    </p>
+
     <h2 class="text-xl font-bold mt-6 mb-2">"Reportar erro"</h2>
     <p class="text-ink-muted mb-3">
       Quando carrega em <em>Reportar erro nesta página</em> abre-se o seu cliente de e-mail
@@ -76,6 +102,9 @@ import Base from "~/layouts/Base.astro";
         agregada, sem identificadores. Servidores na UE.</li>
       <li><strong>Cloudflare Pages</strong> ou <strong>Vercel</strong> (fornecedor a confirmar)
         — alojamento estático.</li>
+      <li><strong>Endpoint de reportes de preço</strong> (a confirmar — Cloudflare Worker ou
+        Formspree na UE). Recebe apenas os campos descritos na secção
+        "Partilha de preço de lar". Sem cookies, sem identificadores.</li>
       <li><strong>Google Fonts</strong> — tipo de letra. Pode ser auto-alojado em versões
         futuras para eliminar este pedido.</li>
     </ul>
