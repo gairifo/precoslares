@@ -1,0 +1,91 @@
+---
+import "~/styles/global.css";
+
+interface Props {
+  title: string;
+  description: string;
+  canonicalPath?: string;
+  bodyClass?: string;
+}
+
+const {
+  title,
+  description,
+  canonicalPath = "/",
+  bodyClass = "",
+} = Astro.props;
+
+const site = "https://lar-ajuda.pt";
+const canonical = site + canonicalPath;
+---
+
+<!doctype html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0f766e" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_PT" />
+    <meta property="og:url" content={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class={bodyClass}>
+    <header class="border-b border-rule bg-white sticky top-0 z-30">
+      <div class="max-w-5xl mx-auto px-5 py-3 flex items-center justify-between gap-4">
+        <a href="/" class="flex items-center gap-2 no-underline text-ink font-bold text-lg">
+          <span class="inline-block w-7 h-7 rounded-md bg-brand-500"></span>
+          <span>lar-ajuda<span class="text-brand-500">.pt</span></span>
+        </a>
+        <nav class="flex items-center gap-2 text-sm">
+          <a href="/calculadora" class="px-3 py-2 rounded-md no-underline bg-brand-500 text-white font-semibold hover:bg-brand-600">Calculadora</a>
+          <a href="/apoios" class="hidden sm:inline px-3 py-2 rounded-md no-underline text-ink-muted hover:bg-brand-50">Apoios</a>
+          <a href="/formularios" class="hidden sm:inline px-3 py-2 rounded-md no-underline text-ink-muted hover:bg-brand-50">Formulários</a>
+          <a href="/sobre" class="hidden sm:inline px-3 py-2 rounded-md no-underline text-ink-muted hover:bg-brand-50">Sobre</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-5 py-8 min-h-[60vh]">
+      <slot />
+    </main>
+
+    <footer class="bg-slate-900 text-slate-300 mt-16">
+      <div class="max-w-5xl mx-auto px-5 py-10 grid sm:grid-cols-4 gap-6 text-sm">
+        <div class="sm:col-span-2">
+          <p class="text-white font-semibold mb-2">lar-ajuda.pt</p>
+          <p class="text-slate-400">
+            Ferramenta pública e independente. Calcula apoios sociais para idosos em Portugal.
+            Sem fins lucrativos. Sem encaminhamentos para lares. Open-source.
+          </p>
+        </div>
+        <div>
+          <p class="text-white font-semibold mb-2">Ferramentas</p>
+          <a class="block text-slate-300 no-underline hover:text-white" href="/calculadora">Calculadora</a>
+          <a class="block text-slate-300 no-underline hover:text-white" href="/formularios">Formulários</a>
+          <a class="block text-slate-300 no-underline hover:text-white" href="/apoios">Glossário de apoios</a>
+        </div>
+        <div>
+          <p class="text-white font-semibold mb-2">Sobre</p>
+          <a class="block text-slate-300 no-underline hover:text-white" href="/sobre">Sobre o projeto</a>
+          <a class="block text-slate-300 no-underline hover:text-white" href="/privacidade">Privacidade</a>
+          <a class="block text-slate-300 no-underline hover:text-white" href="https://github.com/" target="_blank" rel="noopener">Código no GitHub</a>
+        </div>
+      </div>
+      <div class="border-t border-slate-800 text-center text-xs text-slate-500 py-4 px-5">
+        Dados de referência: DGSS, Autoridade Tributária, Portaria 480/2025. Atualizado para 2026.
+      </div>
+    </footer>
+  </body>
+</html>

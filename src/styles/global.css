@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    @apply bg-white text-ink antialiased;
+  }
+  h1, h2, h3, h4 {
+    @apply tracking-tight text-ink;
+  }
+  a {
+    @apply text-brand-500 underline underline-offset-2 decoration-brand-100 hover:decoration-brand-500;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg
+           bg-brand-500 text-white font-semibold no-underline
+           hover:bg-brand-600 transition;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg
+           bg-white text-brand-500 font-semibold no-underline border border-brand-100
+           hover:bg-brand-50 transition;
+  }
+  .field {
+    @apply flex flex-col gap-1.5 mb-4;
+  }
+  .field label {
+    @apply text-sm font-semibold text-ink;
+  }
+  .field small {
+    @apply text-xs text-ink-soft;
+  }
+  .field input,
+  .field select {
+    @apply w-full px-3 py-2.5 rounded-md border border-rule bg-white
+           text-base text-ink
+           focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500;
+  }
+  .chip {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium
+           bg-brand-50 text-brand-700;
+  }
+  .badge-elig-certa { @apply bg-emerald-100 text-emerald-800; }
+  .badge-elig-provavel { @apply bg-brand-100 text-brand-700; }
+  .badge-elig-possivel { @apply bg-amber-100 text-amber-900; }
+  .badge-elig-nao_elegivel { @apply bg-slate-100 text-slate-600; }
+  .badge-elig-nao_avaliado { @apply bg-slate-100 text-slate-600; }
+}

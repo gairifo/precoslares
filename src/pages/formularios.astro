@@ -1,0 +1,47 @@
+---
+import Base from "~/layouts/Base.astro";
+import constants from "~/lib/calculator/constants_2026.json";
+
+const f = constants.formularios as Record<string, { nome: string; url: string }>;
+
+const items = [
+  { k: "rp_5027_dependencia", c: "Pedido de Complemento por Dependência (avaliação SVI)." },
+  { k: "csi_1", c: "Requerimento do Complemento Solidário para Idosos." },
+  { k: "atestado_multiusos", c: "Pedido de junta médica para atestado multiusos. Gratuito; espera 2–6 meses." },
+  { k: "anexo_h_irs", c: "Anexo H da declaração de IRS — onde declarar despesas com lares e dedução por deficiência." },
+  { k: "adse_apoio_lar", c: "Pedido de Apoio em Lar via ADSE Direta (função pública)." },
+  { k: "iasfa_centro_apoio_social", c: "IASFA — Centro de Apoio Social (militares)." },
+  { k: "sad_psp", c: "SAD/PSP — Portal Social PSP." },
+  { k: "cuidador_informal", c: "Estatuto do Cuidador Informal — requerimento na Segurança Social." },
+];
+---
+
+<Base
+  title="Formulários — lar-ajuda.pt"
+  description="Todos os formulários relevantes para pedir apoios sociais para idosos em Portugal."
+  canonicalPath="/formularios"
+>
+  <section class="max-w-3xl mx-auto">
+    <p class="text-sm uppercase tracking-wider text-brand-500 font-semibold mb-2">Hub de formulários</p>
+    <h1 class="text-3xl sm:text-4xl font-bold mb-3">Onde pedir cada apoio</h1>
+    <p class="text-ink-muted mb-8">
+      Todos os formulários relevantes, com link direto para o portal oficial. Para saber quais são os seus,
+      <a href="/calculadora">use a calculadora</a> primeiro — ela diz quais formulários precisa para o seu caso.
+    </p>
+    <div class="space-y-3">
+      {items.map((it) => {
+        const data = f[it.k];
+        if (!data) return null;
+        return (
+          <article class="bg-white border border-rule rounded-xl p-5">
+            <h2 class="text-base font-bold mb-1">{data.nome}</h2>
+            <p class="text-sm text-ink-muted mb-2">{it.c}</p>
+            <a href={data.url} target="_blank" rel="noopener" class="text-sm font-semibold">
+              Abrir portal →
+            </a>
+          </article>
+        );
+      })}
+    </div>
+  </section>
+</Base>

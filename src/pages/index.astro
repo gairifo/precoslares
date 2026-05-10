@@ -1,0 +1,101 @@
+---
+import Base from "~/layouts/Base.astro";
+
+const apoios = [
+  "Complemento por Dependência (1.º e 2.º grau)",
+  "Complemento Solidário para Idosos (CSI)",
+  "Comparticipação SS para ERPI (IPSS / Misericórdia)",
+  "IRS — Dedução de encargos com lares (Art. 84º)",
+  "IRS — Pessoa com deficiência (Art. 87º)",
+  "ADSE / IASFA / SAD-PSP",
+  "Apoios municipais (top concelhos)",
+  "Subsídio de Apoio ao Cuidador Informal",
+];
+
+const stats = [
+  { n: "8", l: "apoios cobertos" },
+  { n: "100%", l: "cálculo no browser" },
+  { n: "0€", l: "cobrado, hoje e sempre" },
+  { n: "MIT", l: "código aberto" },
+];
+
+const cards = [
+  { i: "💶", t: "Estimativa em €/ano", d: "Cada apoio aparece com valor anual, intervalo e a regra exata que o produziu." },
+  { i: "📄", t: "Formulários e próximos passos", d: "Cada estimativa diz qual o formulário, onde entregar e o tempo de resposta esperado." },
+  { i: "🔒", t: "Sem dados, sem registo", d: "A calculadora corre no seu browser. Nada é enviado a servidores. Sem registo, sem newsletter." },
+];
+---
+
+<Base
+  title="lar-ajuda.pt — Calculadora de apoios sociais para idosos em Portugal"
+  description="Saiba que apoios pode receber para ajudar com o lar do seu familiar. Calculadora pública, neutra, sem encaminhamento para lares."
+  canonicalPath="/"
+>
+  <section class="text-center max-w-3xl mx-auto py-8 sm:py-14">
+    <p class="text-sm uppercase tracking-wider text-brand-500 font-semibold mb-3">
+      Calculadora pública · 2026
+    </p>
+    <h1 class="text-3xl sm:text-5xl font-bold leading-tight mb-4">
+      Saiba que apoios pode receber para ajudar com o
+      <span class="text-brand-500">lar do seu familiar.</span>
+    </h1>
+    <p class="text-lg text-ink-muted mb-8">
+      Em 90 segundos: complemento por dependência, CSI, dedução IRS, ADSE, comparticipação
+      em IPSS e mais. Cálculo no seu navegador. Nada é guardado.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+      <a href="/calculadora" class="btn-primary text-base">Iniciar calculadora →</a>
+      <a href="/apoios" class="btn-secondary text-base">Conhecer os apoios</a>
+    </div>
+    <div class="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+      {stats.map((s) => (
+        <div class="bg-white border border-rule rounded-xl p-3">
+          <div class="text-2xl font-bold text-brand-500">{s.n}</div>
+          <div class="text-xs text-ink-soft">{s.l}</div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="grid sm:grid-cols-3 gap-4 my-12">
+    {cards.map((c) => (
+      <div class="bg-white border border-rule rounded-2xl p-6">
+        <div class="text-3xl mb-2">{c.i}</div>
+        <h3 class="font-bold text-lg mb-1">{c.t}</h3>
+        <p class="text-sm text-ink-muted">{c.d}</p>
+      </div>
+    ))}
+  </section>
+
+  <section class="bg-brand-50 border border-brand-100 rounded-2xl p-6 sm:p-10 text-center my-12">
+    <h2 class="text-xl sm:text-2xl font-bold mb-2">Os 8 apoios cobertos</h2>
+    <p class="text-ink-muted mb-5">Todos os principais apoios para idosos no sistema português, num único cálculo.</p>
+    <ul class="grid sm:grid-cols-2 gap-2 text-left max-w-2xl mx-auto text-sm list-none p-0">
+      {apoios.map((a) => (
+        <li class="flex items-start gap-2 bg-white rounded-md px-3 py-2 border border-brand-100">
+          <span class="text-brand-500 font-bold">✓</span>
+          <span>{a}</span>
+        </li>
+      ))}
+    </ul>
+    <div class="mt-7">
+      <a href="/calculadora" class="btn-primary">Calcular agora →</a>
+    </div>
+  </section>
+
+  <section class="my-12 max-w-prose mx-auto">
+    <h2 class="text-2xl font-bold mb-3">Por que existe</h2>
+    <p class="text-ink-muted mb-3">
+      Um familiar idoso a precisar de cuidados é uma das decisões mais difíceis para uma família portuguesa —
+      e o sistema de apoios é fragmentado, opaco e cheio de jargão. Há centenas de milhões de euros em apoios
+      sociais por reclamar todos os anos.
+    </p>
+    <p class="text-ink-muted mb-3">
+      O lar-ajuda.pt foi construído por um filho que estava a passar por isso. É público, neutro e gratuito.
+      Não recebe dinheiro de lares. Não tem leads para vender. Pode ler o código no GitHub.
+    </p>
+    <p class="text-ink-muted">
+      Se a calculadora ajudar a sua família a poupar tempo ou desbloquear um apoio que não conhecia, está a fazer o seu trabalho.
+    </p>
+  </section>
+</Base>

@@ -1,0 +1,133 @@
+{
+  "ano_referencia": 2026,
+  "ultima_atualizacao": "2026-05-10",
+  "fontes": [
+    "Portaria 480/2025 — atualização IAS",
+    "Portaria 480-D/2025 — CSI 2026",
+    "DGSS 2026 — pensões e idade legal de reforma",
+    "CIRS Art. 84º e 87º",
+    "DL 14/2013 — Atestado Multiusos"
+  ],
+
+  "ias": 537.13,
+  "pensao_social_velhice": 537.13,
+  "pensao_minima_regime_geral": 341.08,
+  "salario_minimo_nacional": 870.00,
+
+  "idade_legal_reforma": {
+    "anos": 66,
+    "meses": 9
+  },
+
+  "csi": {
+    "limite_anual_singular": 8040.00,
+    "limite_anual_casal": 14070.00,
+    "limite_mensal_max": 670.00,
+    "residencia_pt_anos_min": 6
+  },
+
+  "complemento_dependencia": {
+    "regime_geral": {
+      "grau_1": 131.20,
+      "grau_2": 236.16
+    },
+    "regime_agricola_nao_contributivo_psi": {
+      "grau_1": 118.08,
+      "grau_2": 223.04
+    },
+    "meses_pagamento": 14
+  },
+
+  "irs_art_84_lares": {
+    "percentagem_dedutivel": 0.25,
+    "limite_anual": 403.75,
+    "cae_validos": ["873", "8810"]
+  },
+
+  "irs_art_87_deficiencia": {
+    "grau_minimo_atestado": 60,
+    "deducao_fixa_factor_ias": 2.5,
+    "deducao_acompanhamento_factor_ias": 4.0,
+    "grau_minimo_acompanhamento": 90
+  },
+
+  "atestado_multiusos": {
+    "grau_minimo_beneficios": 60
+  },
+
+  "erpi_acordo": {
+    "comparticipacao_familiar_pct_min": 0.70,
+    "comparticipacao_familiar_pct_max": 0.85,
+    "cap_rendimento_residente_min": 0.75,
+    "cap_rendimento_residente_max": 0.90,
+    "ss_comparticipacao_lar_min": 500,
+    "ss_comparticipacao_lar_max": 600,
+    "preco_ipss_referencia_min": 600,
+    "preco_ipss_referencia_max": 1100,
+    "preco_privado_referencia_min": 1200,
+    "preco_privado_referencia_max": 2200
+  },
+
+  "cuidador_informal": {
+    "valor_base_min": 430,
+    "valor_base_max": 537
+  },
+
+  "apoios_municipais_destacados": {
+    "lisboa": {
+      "nome": "BUE — Balcão Único do Envelhecimento / Programa Lisboa+65",
+      "url": "https://www.lisboa.pt/cidade/inclusao-social/balcao-unico-do-envelhecimento"
+    },
+    "porto": {
+      "nome": "Apoio à 3.ª Idade — Pelouro da Coesão Social",
+      "url": "https://www.cm-porto.pt/coesao-e-direitos-sociais"
+    },
+    "cascais": {
+      "nome": "Cartão Sénior + apoios pontuais",
+      "url": "https://www.cascais.pt/cartao-senior"
+    },
+    "oeiras": {
+      "nome": "Programa OEIRAS Solidária",
+      "url": "https://www.cm-oeiras.pt/pt/viver/coesao-social"
+    }
+  },
+
+  "formularios": {
+    "rp_5027_dependencia": {
+      "nome": "RP 5027-DGSS — Pedido de Complemento por Dependência",
+      "url": "https://www.seg-social.pt/formularios?kw=RP+5027",
+      "tempo_resposta_dias": 150
+    },
+    "csi_1": {
+      "nome": "Mod. CSI 1-DGSS — Requerimento de CSI",
+      "url": "https://www.seg-social.pt/formularios?kw=CSI",
+      "tempo_resposta_dias": 90
+    },
+    "anexo_h_irs": {
+      "nome": "Anexo H — Benefícios Fiscais e Deduções",
+      "url": "https://www.portaldasfinancas.gov.pt/at/html/index.html"
+    },
+    "atestado_multiusos": {
+      "nome": "Pedido de Junta Médica para Atestado Multiusos (DL 14/2013)",
+      "url": "https://www.sns24.gov.pt/servico/atestado-medico-de-incapacidade-multiuso/",
+      "tempo_resposta_dias_min": 60,
+      "tempo_resposta_dias_max": 180
+    },
+    "adse_apoio_lar": {
+      "nome": "ADSE — Pedido de Apoio em Lar",
+      "url": "https://adsedireta.adse.pt/"
+    },
+    "iasfa_centro_apoio_social": {
+      "nome": "IASFA — Centro de Apoio Social da área de residência",
+      "url": "https://www.iasfa.pt/"
+    },
+    "sad_psp": {
+      "nome": "SAD/PSP — Portal Social PSP",
+      "url": "https://www.psp.pt/"
+    },
+    "cuidador_informal": {
+      "nome": "Estatuto do Cuidador Informal — Requerimento",
+      "url": "https://www.seg-social.pt/cuidador-informal"
+    }
+  }
+}

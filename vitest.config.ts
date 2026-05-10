@@ -1,0 +1,19 @@
+import { defineConfig } from "vitest/config";
+
+export default defineConfig({
+  test: {
+    globals: false,
+    environment: "node",
+    include: ["src/**/__tests__/**/*.test.ts"],
+    coverage: {
+      provider: "v8",
+      include: ["src/lib/calculator/**/*.ts"],
+      exclude: ["**/__tests__/**"],
+    },
+  },
+  resolve: {
+    alias: {
+      "~": "/src",
+    },
+  },
+});
