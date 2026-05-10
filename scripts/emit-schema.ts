@@ -1,10 +1,10 @@
 // Emit a draft-07 JSON Schema for ApoiosInput at build time.
 //
 // Output: public/schema/apoios-input.json (will end up at
-// https://lar-ajuda.pt/schema/apoios-input.json post-deploy)
+// https://precoslares.pt/schema/apoios-input.json post-deploy)
 //
 // Designed for out-of-process LLM agents to declare a tool that calls
-// the lar-ajuda calculator. Mirror this file when adding/renaming a
+// the precoslares calculator. Mirror this file when adding/renaming a
 // field in src/lib/calculator/types.ts. The hand-rolled approach here
 // avoids depending on zod-to-json-schema; the calculator stays pure.
 //
@@ -19,10 +19,10 @@ const OUT = resolve(__dirname, "..", "public", "schema", "apoios-input.json");
 
 const schema = {
   $schema: "http://json-schema.org/draft-07/schema#",
-  $id: "https://lar-ajuda.pt/schema/apoios-input.json",
+  $id: "https://precoslares.pt/schema/apoios-input.json",
   title: "ApoiosInput",
   description:
-    "Input para a calculadora de apoios sociais para idosos em Portugal (lar-ajuda.pt). Apenas idade é obrigatório; restantes campos opcionais (null) — o motor calcula com a informação disponível.",
+    "Input para a calculadora de apoios sociais para idosos em Portugal (precoslares.pt). Apenas idade é obrigatório; restantes campos opcionais (null) — o motor calcula com a informação disponível.",
   type: "object",
   required: ["idade"],
   additionalProperties: false,

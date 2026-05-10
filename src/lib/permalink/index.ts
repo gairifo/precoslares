@@ -47,7 +47,7 @@ export function encode(
   const url =
     typeof window !== "undefined"
       ? `${window.location.origin}${path}#${hash}`
-      : `https://lar-ajuda.pt${path}#${hash}`;
+      : `https://precoslares.pt${path}#${hash}`;
   return { hash, url, truncationRisk };
 }
 

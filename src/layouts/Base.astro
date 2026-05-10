@@ -16,7 +16,7 @@ const {
   bodyClass = "",
 } = Astro.props;
 
-const SITE = "https://lar-ajuda.pt";
+const SITE = "https://precoslares.pt";
 const canonical = SITE + canonicalPath;
 
 // Server-side mailto for "Reportar erro".
@@ -30,7 +30,7 @@ const canonical = SITE + canonicalPath;
 const safePath = /^\/[a-zA-Z0-9/_-]{0,80}$/.test(Astro.url.pathname)
   ? Astro.url.pathname
   : "/";
-const reportSubject = encodeURIComponent(`[lar-ajuda] Erro em ${safePath}`);
+const reportSubject = encodeURIComponent(`[precoslares] Erro em ${safePath}`);
 const reportBody = encodeURIComponent(
   `Página: ${SITE}${safePath}\n\nDescreva o problema:\n`
 );
@@ -55,7 +55,7 @@ const reportMailto = `mailto:gairifo@gmail.com?subject=${reportSubject}&body=${r
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="pt_PT" />
     <meta property="og:url" content={canonical} />
-    <meta property="og:site_name" content="lar-ajuda.pt" />
+    <meta property="og:site_name" content="precoslares.pt" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
@@ -92,7 +92,7 @@ const reportMailto = `mailto:gairifo@gmail.com?subject=${reportSubject}&body=${r
       <div class="max-w-5xl mx-auto px-5 py-3 flex items-center justify-between gap-4">
         <a href="/" class="flex items-center gap-2 no-underline text-ink font-bold text-lg">
           <span class="inline-block w-7 h-7 rounded-md bg-brand-500" aria-hidden="true"></span>
-          <span>lar-ajuda<span class="text-brand-500">.pt</span></span>
+          <span>precoslares<span class="text-brand-500">.pt</span></span>
         </a>
         <nav class="flex items-center gap-2 text-sm" aria-label="Navegação principal">
           <a href="/calculadora" class="nav-link nav-cta px-3 py-2 rounded-md no-underline bg-brand-500 text-white font-semibold hover:bg-brand-600">Calculadora</a>
@@ -110,7 +110,7 @@ const reportMailto = `mailto:gairifo@gmail.com?subject=${reportSubject}&body=${r
     <footer class="bg-slate-900 text-slate-300 mt-16">
       <div class="max-w-5xl mx-auto px-5 py-10 grid sm:grid-cols-4 gap-6 text-sm">
         <div class="sm:col-span-2">
-          <p class="text-white font-semibold mb-2">lar-ajuda.pt</p>
+          <p class="text-white font-semibold mb-2">precoslares.pt</p>
           <p class="text-slate-400">
             Ferramenta pública e independente. Calcula apoios sociais para idosos em Portugal.
             Sem fins lucrativos. Sem encaminhamentos para lares. Open-source.

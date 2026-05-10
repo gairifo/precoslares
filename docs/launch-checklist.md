@@ -27,7 +27,7 @@ Run top-to-bottom before publishing the URL anywhere. Each item is binary; tick 
 
 ## Hosting & domain
 
-- [ ] Domain `lar-ajuda.pt` (or chosen alt) registered.
+- [ ] Domain `precoslares.pt` (or chosen alt) registered.
 - [ ] Hosting set up (Cloudflare Pages or Vercel).
 - [ ] DNS A/AAAA pointed at host.
 - [ ] HTTPS certificate provisioned (auto on both providers).
@@ -37,15 +37,15 @@ Run top-to-bottom before publishing the URL anywhere. Each item is binary; tick 
 ## Analytics
 
 - [ ] Plausible site created at `plausible.io` (paid plan or trial).
-- [ ] `PLAUSIBLE_DOMAIN=lar-ajuda.pt` set in host build environment.
+- [ ] `PLAUSIBLE_DOMAIN=precoslares.pt` set in host build environment.
 - [ ] Re-deploy.
 - [ ] Open site in incognito: `<script src="https://plausible.io/js/script.js">` is in DOM.
 - [ ] Plausible dashboard shows 1 visitor.
-- [ ] **Network tab:** the POST to `https://plausible.io/api/event` carries `u: "https://lar-ajuda.pt/calculadora"` (pathname only — NEVER `#i=...`).
+- [ ] **Network tab:** the POST to `https://plausible.io/api/event` carries `u: "https://precoslares.pt/calculadora"` (pathname only — NEVER `#i=...`).
 
 ## Permalink end-to-end
 
-- [ ] On phone: open `https://lar-ajuda.pt/calculadora` → fill in baseline scenario → submit → click "Copiar link".
+- [ ] On phone: open `https://precoslares.pt/calculadora` → fill in baseline scenario → submit → click "Copiar link".
 - [ ] On desktop in incognito: paste link → result page shows the same numbers.
 - [ ] On the same desktop: paste a corrupted link (truncate the hash by 5 chars) → "Link inválido" banner appears, no crash.
 - [ ] Plausible dashboard shows `permalink_copied`, `permalink_loaded`, `permalink_invalid` events.
@@ -59,17 +59,17 @@ Run top-to-bottom before publishing the URL anywhere. Each item is binary; tick 
 
 ## Reportar erro
 
-- [ ] Tap "Reportar erro nesta página" on mobile → mail app opens with subject "[lar-ajuda] Erro em /<page>" and body containing only the page path.
+- [ ] Tap "Reportar erro nesta página" on mobile → mail app opens with subject "[precoslares] Erro em /<page>" and body containing only the page path.
 - [ ] **Verify the body does NOT contain the permalink hash.**
 - [ ] "Copiar email" fallback button copies `gairifo@gmail.com` to clipboard.
 
 ## SEO / structured data
 
-- [ ] `https://lar-ajuda.pt/sitemap-index.xml` resolves and lists all routes.
-- [ ] `https://lar-ajuda.pt/robots.txt` allows all + references sitemap.
+- [ ] `https://precoslares.pt/sitemap-index.xml` resolves and lists all routes.
+- [ ] `https://precoslares.pt/robots.txt` allows all + references sitemap.
 - [ ] [Schema.org validator](https://validator.schema.org/) green on:
-  - `https://lar-ajuda.pt/`
-  - `https://lar-ajuda.pt/calculadora`
+  - `https://precoslares.pt/`
+  - `https://precoslares.pt/calculadora`
 - [ ] `<html lang="pt-PT">` present everywhere.
 - [ ] `<link rel="alternate" hreflang="pt-pt">` present everywhere.
 

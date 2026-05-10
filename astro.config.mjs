@@ -5,7 +5,7 @@ import sitemap from "@astrojs/sitemap";
 
 // Public-utility, fully-static. No SSR adapter.
 export default defineConfig({
-  site: "https://lar-ajuda.pt",
+  site: "https://precoslares.pt",
   integrations: [
     react(),
     tailwind({ applyBaseStyles: true }),

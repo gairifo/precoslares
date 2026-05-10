@@ -1,6 +1,6 @@
 # Authoring guide
 
-How to add or update content in `lar-ajuda`.
+How to add or update content in `precoslares`.
 
 ## Yearly constants ritual
 

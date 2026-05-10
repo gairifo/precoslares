@@ -3,6 +3,8 @@ date: 2026-05-10
 topic: phase-1-soft-launch-bundle
 ---
 
+> **Renamed 2026-05-10:** every reference to `lar-ajuda.pt` in the body of this doc refers to the project later renamed to **`precoslares.pt`** (with `precolares.pt` as defensive 301-redirect). Decision documented in MEMORY/feedback_brand_decisions.md. Body preserved verbatim for audit traceability.
+
 # Phase 1 Soft-Launch Bundle
 
 ## Problem Frame

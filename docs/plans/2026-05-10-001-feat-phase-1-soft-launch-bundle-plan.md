@@ -9,6 +9,8 @@ deepened: 2026-05-10
 
 # Phase 1 Soft-Launch Bundle
 
+> **Renamed 2026-05-10:** every reference to `lar-ajuda.pt` in this doc refers to the project later renamed to **`precoslares.pt`** (canonical) with `precolares.pt` as defensive 301-redirect. Body preserved verbatim for audit. New name based on autocomplete data showing "preços lares [concelho]" is the dominant unfilled search-intent class — Lares Online structurally hides prices, leaving the lane open. See MEMORY/project_precoslares.md.
+
 ## Enhancement Summary
 
 **Deepened on:** 2026-05-10 with 9 parallel agents (kieran-typescript-reviewer, architecture-strategist, security-sentinel, code-simplicity-reviewer, pattern-recognition-specialist, performance-oracle, julik-frontend-races-reviewer, agent-native-reviewer, best-practices-researcher).

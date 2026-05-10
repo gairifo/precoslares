@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://lar-ajuda.pt/schema/apoios-input.json",
+  "$id": "https://precoslares.pt/schema/apoios-input.json",
   "title": "ApoiosInput",
-  "description": "Input para a calculadora de apoios sociais para idosos em Portugal (lar-ajuda.pt). Apenas idade é obrigatório; restantes campos opcionais (null) — o motor calcula com a informação disponível.",
+  "description": "Input para a calculadora de apoios sociais para idosos em Portugal (precoslares.pt). Apenas idade é obrigatório; restantes campos opcionais (null) — o motor calcula com a informação disponível.",
   "type": "object",
   "required": [
     "idade"

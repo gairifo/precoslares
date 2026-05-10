@@ -1,4 +1,4 @@
-# lar-ajuda.pt
+# precoslares.pt
 
 > Calculadora pública de apoios sociais para idosos em Portugal. Open-source. Sem fins lucrativos. Sem encaminhamento para lares.
 

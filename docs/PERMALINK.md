@@ -1,13 +1,13 @@
 # Permalink format
 
-The `lar-ajuda` calculator encodes user inputs into the URL **fragment** (the part after `#`) so families can share results without a backend, and so personal financial data **never reaches a server**.
+The `precoslares` calculator encodes user inputs into the URL **fragment** (the part after `#`) so families can share results without a backend, and so personal financial data **never reaches a server**.
 
 This document is a stable contract. Out-of-process consumers (LLM agents, sibling tools, external scripts) can rely on it.
 
 ## URL format
 
 ```
-https://lar-ajuda.pt/calculadora#i=<v>;<c>;<f1>;<f2>;...;<fN>
+https://precoslares.pt/calculadora#i=<v>;<c>;<f1>;<f2>;...;<fN>
 ```
 
 - **Prefix:** `i=` (literal)
@@ -87,10 +87,10 @@ When a wizard input field is **added**:
 ## Programmatic use
 
 ```ts
-import { encode, decode, CONSTANTS_VERSION } from "@lar-ajuda/calculator/permalink";
+import { encode, decode, CONSTANTS_VERSION } from "@precoslares/calculator/permalink";
 
 const url = encode({ idade: 82, tipo_pensao: "regime_geral", /* ... */ }).url;
-// → "https://lar-ajuda.pt/calculadora#i=1;2026;82;regime_geral;..."
+// → "https://precoslares.pt/calculadora#i=1;2026;82;regime_geral;..."
 
 const result = decode(url.slice(url.indexOf("#")));
 if (result.ok) {
@@ -99,4 +99,4 @@ if (result.ok) {
 }
 ```
 
-For agents: a JSON Schema for `ApoiosInput` is published at `https://lar-ajuda.pt/schema/apoios-input.json` (see `docs/AUTHORING.md`).
+For agents: a JSON Schema for `ApoiosInput` is published at `https://precoslares.pt/schema/apoios-input.json` (see `docs/AUTHORING.md`).

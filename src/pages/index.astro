@@ -26,14 +26,14 @@ const cards = [
   { i: "🔒", t: "Sem dados, sem registo", d: "A calculadora corre no seu browser. Nada é enviado a servidores. Sem registo, sem newsletter." },
 ];
 
-const SITE = "https://lar-ajuda.pt";
+const SITE = "https://precoslares.pt";
 const homeJsonLd = {
   "@context": "https://schema.org",
   "@graph": [
     {
       "@type": "Organization",
       "@id": `${SITE}#org`,
-      name: "lar-ajuda.pt",
+      name: "precoslares.pt",
       url: SITE,
       description:
         "Ferramenta pública e independente. Calculadora de apoios sociais para idosos em Portugal. Sem fins lucrativos.",
@@ -42,7 +42,7 @@ const homeJsonLd = {
       "@type": "WebSite",
       "@id": `${SITE}#website`,
       url: SITE,
-      name: "lar-ajuda.pt",
+      name: "precoslares.pt",
       inLanguage: "pt-PT",
       publisher: { "@id": `${SITE}#org` },
     },
@@ -51,8 +51,8 @@ const homeJsonLd = {
 ---
 
 <Base
-  title="lar-ajuda.pt — Calculadora de apoios sociais para idosos em Portugal"
-  description="Saiba que apoios pode receber para ajudar com o lar do seu familiar. Calculadora pública, neutra, sem encaminhamento para lares."
+  title="precoslares.pt — Preços de lares e apoios sociais para idosos em Portugal"
+  description="Quanto custa um lar de idosos no seu concelho? Que apoios públicos pode receber para o pagar? Calculadora pública, neutra, sem encaminhamento para lares."
   canonicalPath="/"
 >
   <script
@@ -66,15 +66,16 @@ const homeJsonLd = {
       Calculadora pública · 2026
     </p>
     <h1 class="text-3xl sm:text-5xl font-bold leading-tight mb-4">
-      Saiba que apoios pode receber para ajudar com o
-      <span class="text-brand-500">lar do seu familiar.</span>
+      Quanto vai pagar pelo
+      <span class="text-brand-500">lar do seu familiar?</span>
     </h1>
     <p class="text-lg text-ink-muted mb-8">
-      Em 90 segundos: complemento por dependência, CSI, dedução IRS, ADSE, comparticipação
-      em IPSS e mais. Cálculo no seu navegador. Nada é guardado.
+      Calcule já, em 90 segundos, os apoios públicos a que tem direito —
+      complemento por dependência, CSI, dedução IRS, ADSE, comparticipação em IPSS.
+      Preços de lares por concelho chegam em breve.
     </p>
     <div class="flex flex-col sm:flex-row gap-3 justify-center">
-      <a href="/calculadora" class="btn-primary text-base">Iniciar calculadora →</a>
+      <a href="/calculadora" class="btn-primary text-base">Calcular apoios →</a>
       <a href="/apoios" class="btn-secondary text-base">Conhecer os apoios</a>
     </div>
     <div class="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
@@ -121,7 +122,7 @@ const homeJsonLd = {
       sociais por reclamar todos os anos.
     </p>
     <p class="text-ink-muted mb-3">
-      O lar-ajuda.pt foi construído por um filho que estava a passar por isso. É público, neutro e gratuito.
+      O precoslares.pt foi construído por um filho que estava a passar por isso. É público, neutro e gratuito.
       Não recebe dinheiro de lares. Não tem leads para vender. Pode ler o código no GitHub.
     </p>
     <p class="text-ink-muted">
