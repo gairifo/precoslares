@@ -1,5 +1,8 @@
 # precoslares.pt
 
+[![CI](https://github.com/gairifo/precoslares/actions/workflows/ci.yml/badge.svg)](https://github.com/gairifo/precoslares/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
+
 > Calculadora pública de apoios sociais para idosos em Portugal. Open-source. Sem fins lucrativos. Sem encaminhamento para lares.
 
 ## O que é

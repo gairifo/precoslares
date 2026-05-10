@@ -1,0 +1,29 @@
+version: 2
+updates:
+  # npm dependencies — group minor/patch into one PR per week to reduce
+  # noise. Major version bumps stay separate so we can review breaking
+  # changes deliberately.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Europe/Lisbon"
+    open-pull-requests-limit: 5
+    groups:
+      minor-patch:
+        update-types: ["minor", "patch"]
+        exclude-patterns:
+          # Keep Astro / React major-pinned for visibility.
+          - "astro"
+          - "react"
+          - "react-dom"
+
+  # GitHub Actions — pin and update.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      day: "1"
+    open-pull-requests-limit: 2

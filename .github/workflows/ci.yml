@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+# Cancel in-flight runs for the same branch when a new push lands.
+# Saves CI minutes on rapid pushes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      # ── Engine-purity guard ───────────────────────────────────────────
+      # The calculator must remain pure: no DOM, no fetch, no I/O.
+      # See docs/launch-checklist.md and src/lib/calculator/index.ts header.
+      - name: Guard — calculator engine purity (no DOM/fetch in src/lib/calculator)
+        run: |
+          out=$(grep -rEn '^[^/]*\b(window\.|document\.|localStorage|fetch\()' src/lib/calculator || true)
+          if [ -n "$out" ]; then
+            echo "❌ Calculator engine purity violation:"
+            echo "$out"
+            exit 1
+          fi
+          echo "✓ Engine pure"
+
+      # ── Secret-leak guard ─────────────────────────────────────────────
+      # Only PUBLIC_* env vars and the astro:env schema-declared
+      # PLAUSIBLE_DOMAIN / REPORT_ENDPOINT can be referenced from client code.
+      # Two-step (POSIX ERE; avoids PCRE lookahead portability issues).
+      - name: Guard — no secret env vars in client code
+        run: |
+          refs=$(grep -rEho 'import\.meta\.env\.[A-Z_][A-Z0-9_]*' src/components src/pages src/layouts 2>/dev/null | sort -u || true)
+          if [ -z "$refs" ]; then
+            echo "✓ No import.meta.env references in client code"
+            exit 0
+          fi
+          bad=$(echo "$refs" | grep -vE '^import\.meta\.env\.(PUBLIC_[A-Z0-9_]+|PLAUSIBLE_DOMAIN|REPORT_ENDPOINT|MODE|DEV|PROD|BASE_URL|SITE|SSR)$' || true)
+          if [ -n "$bad" ]; then
+            echo "❌ Disallowed env refs in client code:"
+            echo "$bad"
+            exit 1
+          fi
+          echo "✓ All client env refs are allowlisted ($(echo "$refs" | wc -l | tr -d ' ') unique refs)"
+
+      - name: Vitest (calculator + permalink — 47 tests)
+        run: npm test
+
+      - name: Astro build (70 static pages + sitemap + schema)
+        run: npm run build
+
+      # api/report.ts compiles only on Vercel (Edge runtime). CI must
+      # still typecheck it so we never push a broken Edge Function.
+      - name: Typecheck Vercel Edge Function (api/report.ts)
+        run: npx tsc --noEmit --strict --target esnext --module esnext --moduleResolution bundler --lib esnext,dom api/report.ts
+
+      # Surface CRITICAL/HIGH npm advisories. Doesn't fail on moderate
+      # to avoid CI noise from transitive issues that don't apply here.
+      - name: npm audit (high+ only)
+        run: npm audit --omit=dev --audit-level=high
+        continue-on-error: true
