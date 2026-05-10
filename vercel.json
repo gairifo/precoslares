@@ -1,5 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "astro",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "functions": {
+    "api/report.ts": {
+      "runtime": "edge"
+    }
+  },
   "headers": [
     {
       "source": "/(.*)",

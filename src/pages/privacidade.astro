@@ -102,9 +102,14 @@ import Base from "~/layouts/Base.astro";
         agregada, sem identificadores. Servidores na UE.</li>
       <li><strong>Cloudflare Pages</strong> ou <strong>Vercel</strong> (fornecedor a confirmar)
         — alojamento estático.</li>
-      <li><strong>Endpoint de reportes de preço</strong> (a confirmar — Cloudflare Worker ou
-        Formspree na UE). Recebe apenas os campos descritos na secção
-        "Partilha de preço de lar". Sem cookies, sem identificadores.</li>
+      <li><strong>Endpoint de reportes de preço</strong> — Vercel Edge Function alojada em
+        <code>precoslares.pt/api/report</code>. Recebe apenas os campos descritos
+        na secção "Partilha de preço de lar". Sem cookies, sem identificadores,
+        sem armazenamento persistente nesta função.</li>
+      <li><strong>Resend</strong> (Resend Inc., DE) — encaminhamento por email dos
+        reportes anónimos para o operador do site, para revisão manual
+        antes de integração no diretório. Os emails contêm apenas os
+        campos descritos acima — nunca dados sobre o seu familiar.</li>
       <li><strong>Google Fonts</strong> — tipo de letra. Pode ser auto-alojado em versões
         futuras para eliminar este pedido.</li>
     </ul>

@@ -37,11 +37,37 @@ Run top-to-bottom before publishing the URL anywhere. Each item is binary; tick 
 ## Analytics
 
 - [ ] Plausible site created at `plausible.io` (paid plan or trial).
-- [ ] `PLAUSIBLE_DOMAIN=precoslares.pt` set in host build environment.
+- [ ] `PLAUSIBLE_DOMAIN=precoslares.pt` set in **Vercel → Project → Settings → Environment Variables** (Production + Preview).
 - [ ] Re-deploy.
 - [ ] Open site in incognito: `<script src="https://plausible.io/js/script.js">` is in DOM.
 - [ ] Plausible dashboard shows 1 visitor.
 - [ ] **Network tab:** the POST to `https://plausible.io/api/event` carries `u: "https://precoslares.pt/calculadora"` (pathname only — NEVER `#i=...`).
+
+## Price-report endpoint (Vercel + Resend)
+
+- [ ] Resend account created at `resend.com`. Free tier (100/day, 3,000/month) is enough for v0.
+- [ ] **API key generated** in Resend (Dashboard → API Keys → Create).
+- [ ] In Vercel → Project → Settings → Environment Variables (Production + Preview), add:
+  - `RESEND_API_KEY` = the key from Resend
+  - `REPORT_ENDPOINT` = `https://precoslares.pt/api/report` (the wizard reads this client-side; same-origin POST)
+  - `REPORT_TO_EMAIL` = `gairifo@gmail.com` (or your preferred inbox)
+  - Optional: `REPORT_FROM_EMAIL` (defaults to `Precoslares <onboarding@resend.dev>` — works without domain verification)
+- [ ] Re-deploy.
+- [ ] **Verify domain in Resend** (optional but recommended for deliverability) — Resend → Domains → Add → `precoslares.pt` → add the SPF/DKIM/DMARC DNS records at your registrar (dominios.pt). After verification, change `REPORT_FROM_EMAIL` to e.g. `Precoslares <reports@precoslares.pt>`.
+- [ ] **End-to-end test on a phone in incognito:**
+  - Open https://precoslares.pt/calculadora
+  - Stage 1: idade 80, regime geral, pensão 800, viúvo, semi-dependente
+  - Stage 2: situação = "Num lar privado", concelho = lisboa, mensalidade = 1500, services tick a few, tenure 6m-1y, leave opt-in checked
+  - Click "Calcular apoios →"
+  - Result page shows "Obrigada por contribuir" banner
+  - Email arrives at `REPORT_TO_EMAIL` within ~30s with the structured fields
+- [ ] **Cross-origin block test:** `curl -sw "%{http_code}\n" -X POST https://precoslares.pt/api/report -H "Origin: https://example.com" -H "Content-Type: application/json" -d '{}'` → `403`.
+- [ ] **Schema validation test:** `curl -sw "%{http_code}\n" -X POST https://precoslares.pt/api/report -H "Origin: https://precoslares.pt" -H "Content-Type: application/json" -d '{"v":1,"concelho_slug":"lisboa","lar_tipo":"BOGUS","monthly_price_eur":-99,"services_included":[],"tenure_band":"x","submitted_at":"2026-01-01T00:00:00Z"}'` → `400` with `{"error":"invalid_lar_tipo"}`.
+
+## Sustainable data ingest (post-launch task)
+
+- [ ] Email `cartasocial@gep.mtsss.pt` requesting research / public-utility data agreement for the full Carta Social ERPI dataset (~2,700 records). Frame as: independent public-utility site, no commercial use, source attribution, ready to sign a memorandum. Slow but the right way.
+- [ ] In parallel: as price reports arrive via wizard, batch them weekly into `src/data/lares.json`. Spec §6 notes the trimmed-mean + ≥10/concelho threshold; until that volume, individual reports stay in your inbox for manual review.
 
 ## Permalink end-to-end
 
