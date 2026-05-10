@@ -1,5 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { calcular } from "~/lib/calculator";
+import { CONSTANTS_VERSION } from "~/lib/calculator/version";
+import { decode, encode, type DecodeResult } from "~/lib/permalink";
+import { Events, track } from "~/lib/analytics";
 import type {
   ApoioOutput,
   ApoiosInput,
@@ -14,10 +17,20 @@ import type {
 
 // ── Wizard state ────────────────────────────────────────────────────────
 //
-// Phase 0: progressive disclosure — Stage 1 (apoios) + Stage 2 (situação),
-// then a single result page. Stage 3 comparison comes in Phase 2.
+// SCHEMA STABILITY: the shape of `ApoiosInput` (in src/lib/calculator/types.ts)
+// is encoded into permalinks via src/lib/permalink. Adding a NEW optional
+// field is safe (decoder fills missing as null). RENAMING, REORDERING, or
+// REMOVING a field requires bumping PERMALINK_VERSION in
+// src/lib/permalink/codec.ts and adding a v→2 migrator. The schema
+// stability snapshot test will fail loudly otherwise.
 
 type Stage = "stage1" | "stage2" | "result";
+
+type HydrationBanner =
+  | { kind: "none" }
+  | { kind: "invalid" }
+  | { kind: "version_too_new" }
+  | { kind: "constants_drift"; year: string };
 
 const empty: ApoiosInput = {
   idade: 80,
@@ -44,6 +57,88 @@ export default function Wizard() {
   const [stage, setStage] = useState<Stage>("stage1");
   const [input, setInput] = useState<ApoiosInput>(empty);
   const [showOptional, setShowOptional] = useState(false);
+  const [banner, setBanner] = useState<HydrationBanner>({ kind: "none" });
+  const [toast, setToast] = useState<string | null>(null);
+
+  // Race guard: prevents StrictMode double-effect-fire and any future
+  // parent re-mount from re-firing permalink_loaded.
+  const hydratedRef = useRef(false);
+
+  // Guard: calculator_completed fires once per session via the wizard's
+  // submit handler ONLY. NEVER from a useEffect — that would fire on
+  // permalink hydration too and corrupt the success metric.
+  const completedSession = useCalculatorCompletedFlag();
+
+  // ── Permalink hydration on mount (one-shot) ─────────────────────────
+  useEffect(() => {
+    if (hydratedRef.current) return;
+    hydratedRef.current = true;
+    const rawHash = typeof window !== "undefined" ? window.location.hash : "";
+    if (!rawHash || rawHash.length <= 1) return;
+    const result: DecodeResult = decode(rawHash);
+    if (result.ok) {
+      setInput(result.input);
+      setStage("result");
+      track(Events.PermalinkLoaded);
+      if (result.constantsVersion !== CONSTANTS_VERSION) {
+        setBanner({ kind: "constants_drift", year: result.constantsVersion });
+      }
+    } else {
+      track(Events.PermalinkInvalid, { kind: result.kind });
+      if (result.kind === "unknown_version") {
+        setBanner({ kind: "version_too_new" });
+      } else {
+        setBanner({ kind: "invalid" });
+      }
+    }
+  }, []);
+
+  // ── Print: open all <details> on print, restore after ───────────────
+  // Belt-and-braces per spec-flow analyzer: matchMedia primary,
+  // beforeprint/afterprint fallback, setTimeout safety net (Safari).
+  useEffect(() => {
+    if (stage !== "result") return;
+    const snapshot = new WeakMap<HTMLDetailsElement, boolean>();
+    let restoreTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const expand = () => {
+      document.querySelectorAll<HTMLDetailsElement>("details").forEach((d) => {
+        if (!snapshot.has(d)) snapshot.set(d, d.open);
+        d.open = true;
+      });
+      if (restoreTimer) clearTimeout(restoreTimer);
+      restoreTimer = setTimeout(restore, 30_000);
+    };
+    const restore = () => {
+      document.querySelectorAll<HTMLDetailsElement>("details").forEach((d) => {
+        if (snapshot.has(d)) d.open = snapshot.get(d) ?? false;
+      });
+      if (restoreTimer) { clearTimeout(restoreTimer); restoreTimer = null; }
+    };
+
+    const beforePrint = () => expand();
+    const afterPrint = () => restore();
+    const mql = window.matchMedia("print");
+    const onChange = (e: MediaQueryListEvent) => (e.matches ? expand() : restore());
+
+    window.addEventListener("beforeprint", beforePrint);
+    window.addEventListener("afterprint", afterPrint);
+    mql.addEventListener?.("change", onChange);
+
+    return () => {
+      window.removeEventListener("beforeprint", beforePrint);
+      window.removeEventListener("afterprint", afterPrint);
+      mql.removeEventListener?.("change", onChange);
+      if (restoreTimer) clearTimeout(restoreTimer);
+    };
+  }, [stage]);
+
+  // ── Toast auto-dismiss ──────────────────────────────────────────────
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 2400);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   const result = useMemo<ApoiosResult | null>(
     () => (stage === "result" ? calcular(input) : null),
@@ -54,15 +149,54 @@ export default function Wizard() {
     setInput((p) => ({ ...p, [key]: value }));
   }
 
+  function handleSubmit() {
+    setStage("result");
+    // CRITICAL: fire CalculatorCompleted ONLY from the submit handler.
+    // Permalink hydration uses setStage("result") directly and bypasses
+    // this — that boundary keeps the funnel metric honest.
+    if (completedSession.checkAndSet()) {
+      track(Events.CalculatorCompleted);
+    }
+  }
+
+  function handleRestart() {
+    setInput(empty);
+    setStage("stage1");
+    setShowOptional(false);
+    setBanner({ kind: "none" });
+    if (typeof window !== "undefined" && window.location.hash) {
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+  }
+
+  function handleCopyLink() {
+    if (typeof window === "undefined") return;
+    const enc = encode(input);
+    window.history.replaceState(null, "", `${window.location.pathname}#${enc.hash}`);
+    if (!navigator.clipboard?.writeText) {
+      setToast(`Selecione e copie: ${enc.url}`);
+      return;
+    }
+    navigator.clipboard.writeText(enc.url).then(
+      () => {
+        setToast("Link copiado — qualquer pessoa que o abra verá o mesmo resultado.");
+        track(Events.PermalinkCopied);
+      },
+      () => {
+        setToast(`Não foi possível copiar. Selecione: ${enc.url}`);
+      }
+    );
+  }
+
   if (stage === "result" && result) {
     return (
       <ResultView
         result={result}
-        onRestart={() => {
-          setInput(empty);
-          setStage("stage1");
-          setShowOptional(false);
-        }}
+        banner={banner}
+        toast={toast}
+        canCopy={hydratedRef.current}
+        onRestart={handleRestart}
+        onCopyLink={handleCopyLink}
       />
     );
   }
@@ -74,6 +208,17 @@ export default function Wizard() {
         subtitle="5 perguntas. Cerca de 90 segundos. Pode escolher 'não sei' em qualquer ponto."
         progress={1}
       >
+        {banner.kind === "invalid" && (
+          <div className="banner banner-warn">
+            <span>Link inválido ou desatualizado. Preencha os campos para uma nova estimativa.</span>
+          </div>
+        )}
+        {banner.kind === "version_too_new" && (
+          <div className="banner banner-warn">
+            <span>Este link foi gerado com uma versão mais recente da calculadora. Atualize a página ou preencha de novo.</span>
+          </div>
+        )}
+
         <FieldNum label="Idade" value={input.idade} onChange={(v) => set("idade", v ?? 0)} hint="Idade da pessoa idosa." />
         <FieldEnum<TipoPensao>
           label="Que pensão recebe?"
@@ -227,7 +372,7 @@ export default function Wizard() {
             label="Concelho do lar (slug)"
             value={input.municipio}
             onChange={(v) => set("municipio", v)}
-            hint="Ex: lisboa, porto, cascais. Opcional na Phase 0."
+            hint="Ex: lisboa, porto, cascais. Opcional."
           />
         </>
       )}
@@ -272,12 +417,31 @@ export default function Wizard() {
         <button type="button" className="text-sm text-ink-soft no-underline hover:underline" onClick={() => setStage("stage1")}>
           ← Voltar
         </button>
-        <button type="button" className="btn-primary" onClick={() => setStage("result")}>
+        <button type="button" className="btn-primary" onClick={handleSubmit}>
           Calcular apoios →
         </button>
       </div>
     </StageShell>
   );
+}
+
+// ── Once-per-session flag (sessionStorage, SSR-safe) ────────────────────
+
+function useCalculatorCompletedFlag() {
+  return {
+    checkAndSet(): boolean {
+      if (typeof window === "undefined") return false;
+      try {
+        if (window.sessionStorage.getItem("calc_completed_session")) return false;
+        window.sessionStorage.setItem("calc_completed_session", "1");
+        return true;
+      } catch {
+        // Safari private mode etc. — fall through and return true so the
+        // event still fires once per page load instead of never.
+        return true;
+      }
+    },
+  };
 }
 
 // ── Stage shell ─────────────────────────────────────────────────────────
@@ -298,7 +462,7 @@ function StageShell({
       <div className="mb-6">
         <div className="flex items-center gap-2 text-xs font-semibold text-ink-soft mb-2 uppercase tracking-wide">
           <span>Passo {progress} de 2</span>
-          <span aria-hidden>·</span>
+          <span aria-hidden="true">·</span>
           <span>{progress === 1 ? "Sobre o familiar" : "Situação atual"}</span>
         </div>
         <div className="h-1.5 bg-rule rounded-full overflow-hidden">
@@ -411,7 +575,16 @@ function FieldBool({
 
 // ── Result view ─────────────────────────────────────────────────────────
 
-function ResultView({ result, onRestart }: { result: ApoiosResult; onRestart: () => void }) {
+function ResultView({
+  result, banner, toast, canCopy, onRestart, onCopyLink,
+}: {
+  result: ApoiosResult;
+  banner: HydrationBanner;
+  toast: string | null;
+  canCopy: boolean;
+  onRestart: () => void;
+  onCopyLink: () => void;
+}) {
   const totalEur = formatEur(result.total_anual_estimado_eur);
   const minEur = formatEur(result.total_anual_min_eur);
   const maxEur = formatEur(result.total_anual_max_eur);
@@ -425,22 +598,41 @@ function ResultView({ result, onRestart }: { result: ApoiosResult; onRestart: ()
 
   return (
     <div className="max-w-3xl mx-auto">
+      {banner.kind === "constants_drift" && (
+        <div className="banner banner-warn">
+          <span>
+            Este link foi gerado com valores de <strong>{banner.year}</strong>.
+            A estimativa atual usa valores de <strong>{result.ano_referencia}</strong> —
+            recomenda-se recalcular preenchendo de novo.
+          </span>
+        </div>
+      )}
+
       <div className="text-center mb-8">
         <div className="text-xs font-semibold text-ink-soft uppercase tracking-wide mb-2">
-          Estimativa anual de apoios públicos
+          Estimativa anual de apoios públicos · valores de {result.ano_referencia}
         </div>
         <div className="text-5xl sm:text-6xl font-bold text-brand-500 mb-2 tabular-nums">{totalEur}</div>
         <div className="text-sm text-ink-muted">
-          Intervalo: {minEur} – {maxEur}/ano · Ano de referência {result.ano_referencia}
+          Intervalo: {minEur} – {maxEur}/ano
         </div>
-        <div className="mt-5 flex justify-center gap-2">
+        <div className="mt-5 flex flex-wrap justify-center gap-2 no-print">
           <button type="button" className="btn-secondary" onClick={onRestart}>← Recomeçar</button>
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={onCopyLink}
+            disabled={!canCopy}
+            title={canCopy ? "" : "A carregar…"}
+          >
+            Copiar link
+          </button>
           <button
             type="button"
             className="btn-primary"
             onClick={() => window.print()}
           >
-            Imprimir / PDF
+            Imprimir / Guardar como PDF
           </button>
         </div>
       </div>
@@ -486,6 +678,8 @@ function ResultView({ result, onRestart }: { result: ApoiosResult; onRestart: ()
       <div className="border-t border-rule pt-5 text-xs text-ink-soft space-y-1">
         {result.disclaimers.map((d, i) => <p key={i}>{d}</p>)}
       </div>
+
+      {toast && <div className="toast" role="status">{toast}</div>}
     </div>
   );
 }
