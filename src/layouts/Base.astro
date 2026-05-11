@@ -1,5 +1,6 @@
 ---
 import "~/styles/global.css";
+import "~/styles/brand.css";
 import { PLAUSIBLE_DOMAIN } from "astro:env/client";
 
 interface Props {
@@ -42,7 +43,7 @@ const reportMailto = `mailto:gairifo@gmail.com?subject=${reportSubject}&body=${r
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0f766e" />
+    <meta name="theme-color" content="#1E5BA8" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
@@ -64,7 +65,7 @@ const reportMailto = `mailto:gairifo@gmail.com?subject=${reportSubject}&body=${r
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap"
       rel="stylesheet"
     />
 
@@ -90,12 +91,11 @@ const reportMailto = `mailto:gairifo@gmail.com?subject=${reportSubject}&body=${r
   <body class={bodyClass}>
     <header class="border-b border-rule bg-white sticky top-0 z-30">
       <div class="max-w-5xl mx-auto px-5 py-3 flex items-center justify-between gap-4">
-        <a href="/" class="flex items-center gap-2 no-underline text-ink font-bold text-lg">
-          <span class="inline-block w-7 h-7 rounded-md bg-brand-500" aria-hidden="true"></span>
-          <span>precoslares<span class="text-brand-500">.pt</span></span>
+        <a href="/" aria-label="Preços Lares — início" class="no-underline flex-shrink-0">
+          <img src="/assets/logo-wordmark.svg" alt="Preços Lares" width="180" height="36" />
         </a>
         <nav class="flex items-center gap-2 text-sm" aria-label="Navegação principal">
-          <a href="/calculadora" class="nav-link nav-cta px-3 py-2 rounded-md no-underline bg-brand-500 text-white font-semibold hover:bg-brand-600">Calculadora</a>
+          <a href="/calculadora" class="nav-link nav-cta px-3 py-2 rounded-md no-underline bg-orange-500 text-white font-semibold hover:bg-orange-600">Calculadora</a>
           <a href="/lares" class="nav-link hidden sm:inline px-3 py-2 rounded-md no-underline text-ink-muted hover:bg-brand-50">Lares</a>
           <a href="/apoios" class="nav-link hidden sm:inline px-3 py-2 rounded-md no-underline text-ink-muted hover:bg-brand-50">Apoios</a>
           <a href="/formularios" class="nav-link hidden md:inline px-3 py-2 rounded-md no-underline text-ink-muted hover:bg-brand-50">Formulários</a>
@@ -111,7 +111,9 @@ const reportMailto = `mailto:gairifo@gmail.com?subject=${reportSubject}&body=${r
     <footer class="bg-slate-900 text-slate-300 mt-16">
       <div class="max-w-5xl mx-auto px-5 py-10 grid sm:grid-cols-4 gap-6 text-sm">
         <div class="sm:col-span-2">
-          <p class="text-white font-semibold mb-2">precoslares.pt</p>
+          <a href="/" aria-label="Preços Lares — início" class="inline-block mb-3 no-underline">
+            <img src="/assets/logo-wordmark-tagline.svg" alt="Preços Lares" width="200" height="56" />
+          </a>
           <p class="text-slate-400">
             Ferramenta pública e independente. Calcula apoios sociais para idosos em Portugal.
             Sem fins lucrativos. Sem encaminhamentos para lares. Open-source.

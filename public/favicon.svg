@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#0f766e"/>
-  <path d="M16 34 L32 20 L48 34 L48 48 L36 48 L36 38 L28 38 L28 48 L16 48 Z" fill="#fff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Preços Lares">
+  <title>Preços Lares</title>
+  <rect width="32" height="32" rx="6" fill="#F7F5F0"/>
+  <path d="M 4 16 L 11 8 L 18 16 L 18 27 L 4 27 Z" fill="#1E5BA8"/>
+  <rect x="8" y="19" width="6" height="6" rx="0.5" fill="#F7F5F0"/>
+  <polygon points="18,21 22,16 29,16 29,25 22,25" fill="#E8742C"/>
+  <circle cx="23" cy="20.5" r="1" fill="#F7F5F0"/>
 </svg>
