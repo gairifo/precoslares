@@ -1,15 +1,37 @@
 // Public API for the lares dataset.
 //
 // Pure data lookups; no DOM, no fetch. Loaded at build time via JSON
-// import attribute, frozen, and queried by slug / concelho / filter.
+// import attribute, validated against the Zod schema (single source of
+// truth), frozen, and queried by slug / concelho / filter.
+//
+// Zod is imported via `astro/zod` — already in the Astro bundle, so no
+// extra runtime cost. This module is server-side only; React islands
+// import the slim shape from `./client.ts` instead.
 
 import data from "~/data/lares.json" with { type: "json" };
+import { LarSchema, DatasetMetaSchema } from "./schema";
 import type { Lar, LarTipo, LarValencia } from "./types";
 import { CONCELHOS, getConcelho } from "./concelhos";
 
-const LARES: ReadonlyArray<Lar> = Object.freeze(data.lares as Lar[]);
+const parsed = LarSchema.array().safeParse(data.lares);
+if (!parsed.success) {
+  const first = parsed.error.issues[0];
+  throw new Error(
+    `Invalid lares.json entry [${first?.path.join(".") ?? "?"}]: ${first?.message}`,
+  );
+}
+const metaParsed = data._meta
+  ? DatasetMetaSchema.safeParse(data._meta)
+  : ({ success: true, data: undefined } as const);
+if (!metaParsed.success) {
+  throw new Error(
+    `Invalid lares.json _meta: ${metaParsed.error.issues[0]?.message}`,
+  );
+}
 
-export const META = data._meta;
+const LARES: ReadonlyArray<Lar> = Object.freeze(parsed.data as Lar[]);
+
+export const META = metaParsed.success ? metaParsed.data : undefined;
 
 export function getAllLares(): ReadonlyArray<Lar> {
   return LARES;

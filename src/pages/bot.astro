@@ -1,0 +1,118 @@
+---
+import Base from "~/layouts/Base.astro";
+import { safeJsonForScript } from "~/lib/safe-json";
+
+const SITE = "https://precoslares.pt";
+
+const ld = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": `${SITE}/bot#page`,
+  name: "PrecoslaresBot — política de scraping",
+  description:
+    "Informação pública sobre o bot do precoslares.pt: política, contacto, limites de pedidos, User-Agent, licença dos dados e schemas.",
+  inLanguage: "pt-PT",
+  isPartOf: { "@id": `${SITE}#website` },
+  about: {
+    "@type": "Thing",
+    name: "PrecoslaresBot",
+    description:
+      "Bot que recolhe periodicamente dados públicos de equipamentos sociais (Carta Social, GEP/MTSSS) para alimentar o diretório público de lares.",
+  },
+  mainEntity: {
+    "@type": "Dataset",
+    name: "Lares de idosos em Portugal",
+    license: "https://creativecommons.org/licenses/by-sa/4.0/",
+    creator: { "@type": "Person", name: "Pedro Santos", email: "gairifo@gmail.com" },
+    distribution: [
+      {
+        "@type": "DataDownload",
+        encodingFormat: "application/json",
+        contentUrl: `${SITE}/data/lares.json`,
+      },
+      {
+        "@type": "DataDownload",
+        encodingFormat: "application/schema+json",
+        contentUrl: `${SITE}/schema/lares.json`,
+      },
+    ],
+  },
+};
+---
+
+<Base
+  title="PrecoslaresBot — política e contacto"
+  description="Informação pública sobre o bot do precoslares.pt: política, contacto, limites de pedidos, User-Agent e licença dos dados."
+  canonicalPath="/bot"
+>
+  <script
+    slot="head-jsonld"
+    type="application/ld+json"
+    set:html={safeJsonForScript(ld)}
+  />
+
+  <article class="prose-content max-w-prose mx-auto text-ink">
+    <h1 class="text-3xl font-bold mb-4">PrecoslaresBot</h1>
+
+    <p class="text-ink-muted mb-3">
+      O <strong>PrecoslaresBot</strong> é o agente automatizado do
+      <a href="/">precoslares.pt</a> que recolhe periodicamente dados públicos
+      de equipamentos sociais para alimentar o nosso diretório aberto de lares
+      de idosos.
+    </p>
+
+    <h2 class="text-xl font-bold mt-8 mb-2">Identificação</h2>
+    <dl class="text-ink-muted mb-3 grid grid-cols-1 sm:grid-cols-[max-content_1fr] gap-x-4 gap-y-1">
+      <dt class="font-semibold">User-Agent</dt>
+      <dd><code>PrecoslaresBot/1.0 (+https://precoslares.pt/bot; gairifo@gmail.com)</code></dd>
+      <dt class="font-semibold">Contacto</dt>
+      <dd><a href="mailto:gairifo@gmail.com">gairifo@gmail.com</a></dd>
+      <dt class="font-semibold">Operador</dt>
+      <dd>Pedro Santos (pessoa singular, projeto sem fins lucrativos)</dd>
+      <dt class="font-semibold">Código-fonte</dt>
+      <dd><a href="https://github.com/gairifo/precoslares" rel="noopener">github.com/gairifo/precoslares</a></dd>
+    </dl>
+
+    <h2 class="text-xl font-bold mt-8 mb-2">Política</h2>
+    <ul class="text-ink-muted mb-3 list-disc pl-5 space-y-1">
+      <li>Respeita <code>robots.txt</code> sempre.</li>
+      <li>Limita-se a 1 pedido a cada 2,5 segundos por host.</li>
+      <li>Faz <em>cache</em> agressivo e revalida com <code>If-None-Match</code> / <code>If-Modified-Since</code>.</li>
+      <li>Honra <code>Retry-After</code> em respostas 429 / 503.</li>
+      <li>Pára imediatamente se receber 5% de erros ou um pedido explícito do operador da origem.</li>
+      <li>Recolhe apenas dados públicos publicados pelo Estado Português ao abrigo do direito de reutilização (LADA Art. 7º).</li>
+    </ul>
+
+    <h2 class="text-xl font-bold mt-8 mb-2">Dados</h2>
+    <ul class="text-ink-muted mb-3 list-disc pl-5 space-y-1">
+      <li>Licença do nosso conjunto: <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="noopener">CC&nbsp;BY-SA 4.0</a>.</li>
+      <li>Atribuição de origem: cada lar tem <code>_meta.carta_social_url</code> com o link directo para a ficha pública na Carta Social.</li>
+      <li>Endpoints para agentes:
+        <ul class="list-disc pl-5">
+          <li><a href="/data/lares.json"><code>/data/lares.json</code></a> — dataset completo</li>
+          <li><a href="/data/lares-manifest.json"><code>/data/lares-manifest.json</code></a> — manifesto leve para indexação</li>
+          <li><a href="/data/concelhos.json"><code>/data/concelhos.json</code></a> — agregados por concelho</li>
+          <li><a href="/schema/lares.json"><code>/schema/lares.json</code></a> — JSON Schema</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h2 class="text-xl font-bold mt-8 mb-2">Bloquear o bot</h2>
+    <p class="text-ink-muted mb-3">
+      Se for operador de um site e preferir que não recolhamos os seus dados,
+      basta adicionar ao seu <code>robots.txt</code>:
+    </p>
+    <pre class="bg-ink/5 text-sm p-3 rounded mb-3 overflow-x-auto"><code>User-agent: PrecoslaresBot
+Disallow: /</code></pre>
+    <p class="text-ink-muted mb-3">
+      Ou envie um email para <a href="mailto:gairifo@gmail.com">gairifo@gmail.com</a> que removemos a fonte na próxima ronda.
+    </p>
+
+    <h2 class="text-xl font-bold mt-8 mb-2">Mais informação</h2>
+    <ul class="text-ink-muted mb-3 list-disc pl-5 space-y-1">
+      <li><a href="https://github.com/gairifo/precoslares/blob/master/ETHICS.md" rel="noopener">ETHICS.md</a></li>
+      <li><a href="https://github.com/gairifo/precoslares/blob/master/LEGAL.md" rel="noopener">LEGAL.md</a></li>
+      <li><a href="https://github.com/gairifo/precoslares/blob/master/MAINTAINERS.md" rel="noopener">MAINTAINERS.md</a></li>
+    </ul>
+  </article>
+</Base>

@@ -18,7 +18,7 @@ permissions:
 jobs:
   ci:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v4
@@ -67,8 +67,58 @@ jobs:
       - name: Vitest (calculator + permalink — 47 tests)
         run: npm test
 
-      - name: Astro build (70 static pages + sitemap + schema)
+      - name: Astro build (static pages + sitemap + schema)
         run: npm run build
+
+      # ── Client bundle size cap ────────────────────────────────────────
+      # Wizard is the only React island and the only place the lares
+      # JSON could leak in. Cap the gzip'd Wizard chunk at 20 kB and
+      # total client JS at 90 kB (React runtime is ~58 kB on its own;
+      # the 1.5 MB lares.json leaking would still trip the cap).
+      # See plan §A10 + performance #5.
+      - name: Guard — client bundle size cap (Wizard ≤ 20 kB gz, total ≤ 90 kB gz)
+        run: |
+          set -e
+          wizard=$(ls dist/_astro/Wizard*.js 2>/dev/null | head -1 || true)
+          if [ -z "$wizard" ]; then
+            echo "❌ Wizard chunk not found in dist/_astro/"
+            ls dist/_astro/ || true
+            exit 1
+          fi
+          wsize=$(gzip -c "$wizard" | wc -c | tr -d ' ')
+          echo "Wizard chunk gzipped: ${wsize} bytes"
+          if [ "$wsize" -ge 20000 ]; then
+            echo "❌ Wizard chunk exceeds 20 kB gz (${wsize} bytes)"
+            exit 1
+          fi
+          total=$(find dist/_astro -name '*.js' -exec gzip -c {} \; | wc -c | tr -d ' ')
+          echo "Total client JS gzipped: ${total} bytes"
+          if [ "$total" -ge 90000 ]; then
+            echo "❌ Total client JS exceeds 90 kB gz (${total} bytes)"
+            exit 1
+          fi
+          echo "✓ Bundle within budget"
+
+      # ── set:html guard ───────────────────────────────────────────────
+      # Any `set:html=` in pages/layouts must go through safeJsonForScript
+      # (or be the explicit JSON-LD pattern that uses it). Prevents an
+      # accidental {ld} interpolation from injecting unescaped </script>.
+      # See plan §A11 + security #C.
+      - name: Guard — set:html requires safeJsonForScript
+        run: |
+          set -e
+          out=$(grep -rEn 'set:html=' src/pages src/layouts 2>/dev/null || true)
+          if [ -z "$out" ]; then
+            echo "✓ No set:html usages"
+            exit 0
+          fi
+          bad=$(echo "$out" | grep -v 'safeJsonForScript' || true)
+          if [ -n "$bad" ]; then
+            echo "❌ set:html without safeJsonForScript:"
+            echo "$bad"
+            exit 1
+          fi
+          echo "✓ All set:html usages go through safeJsonForScript"
 
       # api/report.ts compiles only on Vercel (Edge runtime). CI must
       # still typecheck it so we never push a broken Edge Function.

@@ -4,7 +4,10 @@ import { CONSTANTS_VERSION } from "~/lib/calculator/version";
 import { decode, encode, type DecodeResult } from "~/lib/permalink";
 import { Events, track } from "~/lib/analytics";
 import { CONCELHOS } from "~/lib/lares/concelhos";
-import { getAllLares, getLaresByConcelho } from "~/lib/lares";
+// CRITICAL: import ONLY from ~/lib/lares/client (slim subset, ~50 kB gz
+// max at full Carta Social scale). Never import ~/lib/lares (full data
+// ~1.5 MB at scale) from a client React island — would balloon Wizard.js.
+import { getLaresByConcelho } from "~/lib/lares/client";
 import {
   SERVICOS_LABELS,
   TENURE_LABELS,
