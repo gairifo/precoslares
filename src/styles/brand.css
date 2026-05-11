@@ -1,0 +1,180 @@
+/* ============================================================
+   Preços Lares — Brand tokens
+   Drop this into your global stylesheet, or @import it.
+   All values are CSS variables under the --pl-* namespace.
+   ============================================================ */
+
+:root {
+  /* ---- Primary brand colors ---- */
+  --pl-blue:           #1E5BA8;   /* primary, links, buttons, headers */
+  --pl-blue-dark:      #154480;   /* hover/active state */
+  --pl-blue-soft:      #E8F0FA;   /* tinted backgrounds */
+
+  --pl-orange:         #E8742C;   /* accents, CTAs, price highlights */
+  --pl-orange-dark:    #C45D1C;   /* hover/active state */
+  --pl-orange-soft:    #FCEDE2;   /* tinted backgrounds */
+
+  /* ---- Neutrals ---- */
+  --pl-ink:            #1A1A1A;   /* headings */
+  --pl-text:           #2C2C2A;   /* body */
+  --pl-text-muted:     #6B6B6B;   /* secondary text */
+  --pl-text-soft:      #9A9A98;   /* tertiary, captions */
+  --pl-bg:             #FFFFFF;   /* page background */
+  --pl-surface:        #F7F5F0;   /* cards on page, warm cream */
+  --pl-surface-alt:    #FAFAF7;   /* alternating rows */
+  --pl-border:         #E5E2DA;   /* default border */
+  --pl-border-strong:  #C9C5BA;   /* emphasized border */
+
+  /* ---- Semantic ---- */
+  --pl-success:        #2E8B57;
+  --pl-success-soft:   #E6F2EC;
+  --pl-warning:        #D4881D;
+  --pl-warning-soft:   #FBF1DE;
+  --pl-danger:         #C53030;
+  --pl-danger-soft:    #FBE9E9;
+
+  /* ---- Typography stacks ---- */
+  --pl-font-display:   'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --pl-font-body:      'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --pl-font-mono:      'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* ---- Type scale ---- */
+  --pl-text-xs:        12px;
+  --pl-text-sm:        14px;
+  --pl-text-base:      16px;
+  --pl-text-lg:        18px;
+  --pl-text-xl:        20px;
+  --pl-text-2xl:       24px;
+  --pl-text-3xl:       30px;
+  --pl-text-4xl:       36px;
+  --pl-text-5xl:       48px;
+
+  --pl-leading-tight:  1.2;
+  --pl-leading-snug:   1.4;
+  --pl-leading-normal: 1.6;
+
+  /* ---- Radius ---- */
+  --pl-radius-sm:      4px;
+  --pl-radius:         8px;
+  --pl-radius-lg:      12px;
+  --pl-radius-xl:      16px;
+  --pl-radius-full:    9999px;
+
+  /* ---- Elevation ---- */
+  --pl-shadow-sm:      0 1px 2px rgba(0, 0, 0, 0.04);
+  --pl-shadow:         0 2px 8px rgba(0, 0, 0, 0.06);
+  --pl-shadow-lg:      0 8px 24px rgba(0, 0, 0, 0.08);
+
+  /* ---- Spacing scale (4px base) ---- */
+  --pl-space-1:        4px;
+  --pl-space-2:        8px;
+  --pl-space-3:        12px;
+  --pl-space-4:        16px;
+  --pl-space-5:        20px;
+  --pl-space-6:        24px;
+  --pl-space-8:        32px;
+  --pl-space-10:       40px;
+  --pl-space-12:       48px;
+  --pl-space-16:       64px;
+}
+
+/* ============================================================
+   Base typography reset — optional, paste only if useful
+   ============================================================ */
+
+body {
+  font-family: var(--pl-font-body);
+  font-size: var(--pl-text-base);
+  line-height: var(--pl-leading-normal);
+  color: var(--pl-text);
+  background: var(--pl-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--pl-font-display);
+  font-weight: 700;
+  color: var(--pl-ink);
+  letter-spacing: -0.01em;
+  line-height: var(--pl-leading-tight);
+}
+
+h1 { font-size: var(--pl-text-5xl); letter-spacing: -0.02em; }
+h2 { font-size: var(--pl-text-4xl); letter-spacing: -0.015em; }
+h3 { font-size: var(--pl-text-2xl); }
+h4 { font-size: var(--pl-text-xl); }
+
+a {
+  color: var(--pl-blue);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+a:hover { color: var(--pl-blue-dark); }
+
+/* ============================================================
+   Logo lockups — utility classes
+   ============================================================ */
+
+.pl-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.pl-logo__mark {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.pl-logo__wordmark {
+  font-family: var(--pl-font-display);
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.pl-logo__wordmark .pl-blue   { color: var(--pl-blue); }
+.pl-logo__wordmark .pl-orange { color: var(--pl-orange); }
+
+/* ============================================================
+   Buttons — primary and secondary
+   ============================================================ */
+
+.pl-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--pl-radius);
+  font-family: var(--pl-font-body);
+  font-weight: 600;
+  font-size: var(--pl-text-base);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+  text-decoration: none;
+}
+
+.pl-btn--primary {
+  background: var(--pl-orange);
+  color: #FFFFFF;
+}
+.pl-btn--primary:hover { background: var(--pl-orange-dark); }
+
+.pl-btn--secondary {
+  background: var(--pl-blue);
+  color: #FFFFFF;
+}
+.pl-btn--secondary:hover { background: var(--pl-blue-dark); }
+
+.pl-btn--ghost {
+  background: transparent;
+  color: var(--pl-blue);
+  border-color: var(--pl-border);
+}
+.pl-btn--ghost:hover { border-color: var(--pl-blue); background: var(--pl-blue-soft); }

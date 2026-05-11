@@ -5,22 +5,30 @@ export default {
     extend: {
       colors: {
         ink: {
-          DEFAULT: "#0f172a",
-          muted: "#475569",
-          soft: "#64748b",
+          DEFAULT: "#1A1A1A",
+          muted: "#6B6B6B",
+          soft: "#9A9A98",
         },
         brand: {
-          50: "#f0fdfa",
-          100: "#ccfbf1",
-          500: "#0f766e",
-          600: "#115e59",
-          700: "#134e4a",
+          50: "#E8F0FA",
+          100: "#C5D8F0",
+          500: "#1E5BA8",
+          600: "#154480",
+          700: "#0F3566",
         },
-        accent: "#f59e0b",
-        rule: "#e2e8f0",
+        orange: {
+          50: "#FCEDE2",
+          100: "#F8D4B8",
+          500: "#E8742C",
+          600: "#C45D1C",
+          700: "#9A4214",
+        },
+        surface: "#F7F5F0",
+        rule: "#E5E2DA",
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
+        display: ["Plus Jakarta Sans", "Inter", "system-ui", "-apple-system", "sans-serif"],
         serif: ["Source Serif Pro", "Georgia", "serif"],
       },
       maxWidth: {

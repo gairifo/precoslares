@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 80" role="img" aria-label="Preços Lares">
+  <title>Preços Lares</title>
+  <desc>Horizontal logo lockup: a blue house with an orange price tag, followed by the Preços Lares wordmark in blue and orange.</desc>
+
+  <g transform="translate(4, 10) scale(0.9375)">
+    <path d="M 4 28 L 19 11 L 34 28 L 34 56 L 4 56 Z" fill="#1E5BA8"/>
+    <rect x="13" y="36" width="11" height="11" rx="1" fill="#FFFFFF"/>
+    <polygon points="34,36 41,26 60,26 60,46 41,46" fill="#E8742C"/>
+    <circle cx="43" cy="36" r="2" fill="#FFFFFF"/>
+    <text x="51" y="42"
+          font-family="'Plus Jakarta Sans','Inter',system-ui,-apple-system,sans-serif"
+          font-weight="800"
+          font-size="14"
+          fill="#FFFFFF"
+          text-anchor="middle">$</text>
+  </g>
+
+  <text x="76" y="54"
+        font-family="'Plus Jakarta Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif"
+        font-weight="800"
+        font-size="42"
+        letter-spacing="-1">
+    <tspan fill="#1E5BA8">Preços</tspan><tspan fill="#E8742C"> Lares</tspan>
+  </text>
+</svg>
