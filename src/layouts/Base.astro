@@ -2,6 +2,7 @@
 import "~/styles/global.css";
 import "~/styles/brand.css";
 import { PLAUSIBLE_DOMAIN } from "astro:env/client";
+import Analytics from "@vercel/analytics/astro";
 
 interface Props {
   title: string;
@@ -87,6 +88,9 @@ const reportMailto = `mailto:gairifo@gmail.com?subject=${reportSubject}&body=${r
         <script is:inline>{`window.plausible=window.plausible||function(){(window.plausible.q=window.plausible.q||[]).push(arguments)}`}</script>
       </>
     )}
+
+    {/* Vercel Web Analytics */}
+    <Analytics />
   </head>
   <body class={bodyClass}>
     <header class="border-b border-rule bg-white sticky top-0 z-30">
