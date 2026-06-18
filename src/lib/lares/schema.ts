@@ -68,7 +68,7 @@ const LarBaseSchema = z.object({
   distritoSlug: z.string().regex(/^[a-z0-9](?:[a-z0-9-]{0,50})$/),
   freguesia: z.string().max(100).optional(),
   morada: z.string().max(200).optional(),
-  codigoPostal: z.string().max(20).optional(),
+  codigoPostal: z.string().max(50).optional(),
   telefone: z.string().max(30).optional(),
   email: z.string().email().optional(),
   website: z.string().url().optional(),
@@ -83,8 +83,9 @@ const CartaSocialMetaSchema = z.object({
   carta_social_id: z.number().int().positive(),
   /** Stable URL for deep-link attribution. */
   carta_social_url: z.string().url(),
-  /** Alvará / license number — the canonical identity for re-merges. */
-  alvara: z.string().min(1).max(50),
+  /** Alvará / license number — not present in public HTML; populated by
+   *  operator-claim flow or manual curation. Optional for scraper output. */
+  alvara: z.string().min(1).max(50).optional(),
   /** ISO date this entry was last confirmed in a scrape run. */
   last_seen_at: z.string(),
 });

@@ -13,7 +13,7 @@ export async function getStaticPaths() {
 const { concelho } = Astro.props;
 const lares = getLaresByConcelho(concelho.slug);
 
-const SITE = "https://precoslares.pt";
+const SITE = "https://www.precoslares.pt";
 const url = `${SITE}/lares/${concelho.slug}`;
 
 const ipssCount = lares.filter((l) => l.tipo === "ipss" || l.tipo === "misericordia").length;

@@ -11,7 +11,7 @@
 import data from "~/data/lares.json" with { type: "json" };
 import { LarSchema, DatasetMetaSchema } from "./schema";
 import type { Lar, LarTipo, LarValencia } from "./types";
-import { CONCELHOS, getConcelho } from "./concelhos";
+import { CONCELHOS, getConcelho, registerConcelhoFromLar } from "./concelhos";
 
 const parsed = LarSchema.array().safeParse(data.lares);
 if (!parsed.success) {
@@ -30,6 +30,10 @@ if (!metaParsed.success) {
 }
 
 const LARES: ReadonlyArray<Lar> = Object.freeze(parsed.data as Lar[]);
+
+for (const l of LARES) {
+  registerConcelhoFromLar(l.concelhoSlug, l.distritoSlug);
+}
 
 export const META = metaParsed.success ? metaParsed.data : undefined;
 
@@ -65,43 +69,54 @@ export interface ConcelhoSummary {
   precoMediana?: number;
 }
 
-export function getConcelhoSummaries(): ConcelhoSummary[] {
-  return CONCELHOS.map((c) => {
-    const lares = LARES.filter((l) => l.concelhoSlug === c.slug);
-    const prices = lares
-      .filter((l) => l.preco?.min != null && l.preco?.max != null)
-      .map((l) => ({ min: l.preco!.min!, max: l.preco!.max! }));
-
-    let precoMin: number | undefined;
-    let precoMax: number | undefined;
-    let precoMediana: number | undefined;
-    if (prices.length > 0) {
-      precoMin = Math.min(...prices.map((p) => p.min));
-      precoMax = Math.max(...prices.map((p) => p.max));
-      const midpoints = prices.map((p) => (p.min + p.max) / 2).sort((a, b) => a - b);
-      precoMediana = midpoints[Math.floor(midpoints.length / 2)];
+function getAllConcelhos() {
+  const seen = new Set(CONCELHOS.map((c) => c.slug));
+  const extra: typeof CONCELHOS = [];
+  for (const l of LARES) {
+    if (!seen.has(l.concelhoSlug)) {
+      seen.add(l.concelhoSlug);
+      extra.push(getConcelho(l.concelhoSlug)!);
     }
-
-    return {
-      slug: c.slug,
-      nome: c.nome,
-      distritoSlug: c.distritoSlug,
-      larCount: lares.length,
-      ipssCount: lares.filter((l) => l.tipo === "ipss").length,
-      privadoCount: lares.filter((l) => l.tipo === "privado").length,
-      misericordiaCount: lares.filter((l) => l.tipo === "misericordia").length,
-      precoMin,
-      precoMax,
-      precoMediana,
-    };
-  });
+  }
+  return [...CONCELHOS, ...extra];
 }
 
-/** Concelhos that we render programmatic pages for. Returns concelhos with
- *  ≥ 1 lar in the seed AND those marked topAutocomplete (so empty pages
- *  exist for high-search-volume concelhos as SEO surface). */
+function summarizeConcelho(c: { slug: string; nome: string; distritoSlug: string }): ConcelhoSummary {
+  const lares = LARES.filter((l) => l.concelhoSlug === c.slug);
+  const prices = lares
+    .filter((l) => l.preco?.min != null && l.preco?.max != null)
+    .map((l) => ({ min: l.preco!.min!, max: l.preco!.max! }));
+
+  let precoMin: number | undefined;
+  let precoMax: number | undefined;
+  let precoMediana: number | undefined;
+  if (prices.length > 0) {
+    precoMin = Math.min(...prices.map((p) => p.min));
+    precoMax = Math.max(...prices.map((p) => p.max));
+    const midpoints = prices.map((p) => (p.min + p.max) / 2).sort((a, b) => a - b);
+    precoMediana = midpoints[Math.floor(midpoints.length / 2)];
+  }
+
+  return {
+    slug: c.slug,
+    nome: c.nome,
+    distritoSlug: c.distritoSlug,
+    larCount: lares.length,
+    ipssCount: lares.filter((l) => l.tipo === "ipss").length,
+    privadoCount: lares.filter((l) => l.tipo === "privado").length,
+    misericordiaCount: lares.filter((l) => l.tipo === "misericordia").length,
+    precoMin,
+    precoMax,
+    precoMediana,
+  };
+}
+
+export function getConcelhoSummaries(): ConcelhoSummary[] {
+  return getAllConcelhos().map(summarizeConcelho);
+}
+
 export function getRoutedConcelhos() {
-  return CONCELHOS.filter((c) => {
+  return getAllConcelhos().filter((c) => {
     const has = LARES.some((l) => l.concelhoSlug === c.slug);
     return has || c.topAutocomplete;
   });

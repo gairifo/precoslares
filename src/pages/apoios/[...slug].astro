@@ -14,7 +14,7 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content, headings } = await render(entry);
 
-const SITE = "https://precoslares.pt";
+const SITE = "https://www.precoslares.pt";
 const url = `${SITE}/apoios/${entry.id}`;
 
 const articleLd = {

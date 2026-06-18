@@ -67,6 +67,33 @@ export const CONCELHOS_BY_SLUG = Object.fromEntries(
 
 export const TOP_CONCELHOS = CONCELHOS.filter((c) => c.topAutocomplete);
 
+function slugToName(slug: string): string {
+  const lower = ["de", "da", "do", "das", "dos", "e", "a", "o"];
+  return slug
+    .split("-")
+    .map((w, i) => (i > 0 && lower.includes(w)) ? w : w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+let _dynamicCache: Map<string, Concelho> | undefined;
+
+export function registerConcelhoFromLar(slug: string, distritoSlug: string): void {
+  if (CONCELHOS_BY_SLUG[slug]) return;
+  if (!_dynamicCache) _dynamicCache = new Map();
+  if (_dynamicCache.has(slug)) return;
+  _dynamicCache.set(slug, {
+    slug,
+    nome: slugToName(slug),
+    distritoSlug,
+    topAutocomplete: false,
+  });
+}
+
 export function getConcelho(slug: string): Concelho | null {
-  return CONCELHOS_BY_SLUG[slug] ?? null;
+  return CONCELHOS_BY_SLUG[slug] ?? _dynamicCache?.get(slug) ?? {
+    slug,
+    nome: slugToName(slug),
+    distritoSlug: "",
+    topAutocomplete: false,
+  };
 }
