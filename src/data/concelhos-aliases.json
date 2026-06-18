@@ -1,0 +1,7 @@
+{
+  "_meta": {
+    "description": "Carta Social concelho-name aliases → our canonical concelhoSlug. The scraper mapper consults this before falling back to slugify(). Used to normalize Açores/Madeira variants and accent / hyphen quirks (e.g. 'Vila Nova de Gaia' vs 'vila-nova-de-gaia', 'Calheta (Madeira)' vs 'calheta-madeira').",
+    "schema": { "<carta-social-name-or-slug>": "<our-concelho-slug>" }
+  },
+  "aliases": {}
+}

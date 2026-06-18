@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     globals: false,
     environment: "node",
-    include: ["src/**/__tests__/**/*.test.ts"],
+    include: ["{src,scripts}/**/__tests__/**/*.test.ts"],
     coverage: {
       provider: "v8",
       include: ["src/lib/calculator/**/*.ts"],

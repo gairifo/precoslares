@@ -1,0 +1,7 @@
+{
+  "_meta": {
+    "description": "Tombstones for removed lar pages. The prebuild generate-headers.ts script reads this file and emits 410-Gone rules to public/_headers + vercel.json. NEVER hand-edit the _headers file directly — edit this and re-run prebuild.",
+    "schema": { "slug": "string", "removedAt": "ISO date", "reason": "string" }
+  },
+  "tombstones": []
+}

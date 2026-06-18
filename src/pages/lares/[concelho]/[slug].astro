@@ -20,7 +20,7 @@ const { lar } = Astro.props;
 const concelho = getConcelho(lar.concelhoSlug);
 if (!concelho) throw new Error(`Lar ${lar.slug} references unknown concelho ${lar.concelhoSlug}`);
 
-const SITE = "https://precoslares.pt";
+const SITE = "https://www.precoslares.pt";
 const url = `${SITE}/lares/${concelho.slug}/${lar.slug}`;
 
 const localBusinessLd: Record<string, unknown> = {
