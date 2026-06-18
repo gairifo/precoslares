@@ -131,6 +131,31 @@ const sourceLabel: Record<string, string> = {
       </section>
     )}
 
+    {(lar.telefone || lar.email) && (
+      <section class="bg-emerald-50 border border-emerald-200 rounded-xl p-5 mb-6">
+        <h2 class="text-base font-bold mb-3">Contactar este lar</h2>
+        <div class="flex flex-wrap gap-3">
+          {lar.telefone && (
+            <a href={`tel:${lar.telefone.replace(/\s/g, "")}`} class="inline-flex items-center gap-2 text-base font-semibold text-white bg-emerald-600 rounded-lg px-5 py-3 no-underline hover:bg-emerald-700 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Ligar {lar.telefone}
+            </a>
+          )}
+          {lar.email && (
+            <a href={`mailto:${lar.email}`} class="inline-flex items-center gap-2 text-base font-semibold text-emerald-700 bg-white border border-emerald-300 rounded-lg px-5 py-3 no-underline hover:bg-emerald-50 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+              Enviar email
+            </a>
+          )}
+        </div>
+        {lar.website && (
+          <p class="text-sm text-emerald-700 mt-3">
+            <a href={lar.website} target="_blank" rel="noopener nofollow" class="text-emerald-700 underline">{lar.website.replace(/^https?:\/\//, "")}</a>
+          </p>
+        )}
+      </section>
+    )}
+
     <section class="bg-white border border-rule rounded-xl p-5 mb-6">
       <h2 class="text-base font-bold mb-3">Sobre este lar</h2>
       <dl class="space-y-2 text-sm">
