@@ -20,6 +20,12 @@ const {
 const SITE = "https://www.precoslares.pt";
 const canonical = SITE + canonicalPath;
 
+const pathname = Astro.url.pathname;
+function isActive(href: string): boolean {
+  if (href === "/") return pathname === "/";
+  return pathname.startsWith(href);
+}
+
 // Server-side mailto for "Reportar erro".
 //
 // SECURITY: build href from `Astro.url.pathname` only. NEVER from
@@ -95,11 +101,11 @@ const reportMailto = `mailto:gairifo@gmail.com?subject=${reportSubject}&body=${r
           <img src="/assets/logo-wordmark.svg" alt="Preços Lares" width="180" height="36" />
         </a>
         <nav class="flex items-center gap-2 text-sm" aria-label="Navegação principal">
-          <a href="/calculadora" class="nav-link nav-cta px-3 py-2 rounded-md no-underline bg-orange-500 text-white font-semibold hover:bg-orange-600">Calculadora</a>
-          <a href="/lares" class="nav-link hidden sm:inline px-3 py-2 rounded-md no-underline text-ink-muted hover:bg-brand-50">Lares</a>
-          <a href="/apoios" class="nav-link hidden sm:inline px-3 py-2 rounded-md no-underline text-ink-muted hover:bg-brand-50">Apoios</a>
-          <a href="/formularios" class="nav-link hidden md:inline px-3 py-2 rounded-md no-underline text-ink-muted hover:bg-brand-50">Formulários</a>
-          <a href="/sobre" class="nav-link hidden md:inline px-3 py-2 rounded-md no-underline text-ink-muted hover:bg-brand-50">Sobre</a>
+          <a href="/calculadora" class:list={["nav-link nav-cta px-3 py-2 rounded-md no-underline font-semibold", isActive("/calculadora") ? "bg-orange-600 text-white" : "bg-orange-500 text-white hover:bg-orange-600"]} aria-current={isActive("/calculadora") ? "page" : undefined}>Calculadora</a>
+          <a href="/lares" class:list={["nav-link hidden sm:inline px-3 py-2 rounded-md no-underline", isActive("/lares") ? "text-brand-600 bg-brand-50 font-semibold" : "text-ink-muted hover:bg-brand-50"]} aria-current={isActive("/lares") ? "page" : undefined}>Lares</a>
+          <a href="/apoios" class:list={["nav-link hidden sm:inline px-3 py-2 rounded-md no-underline", isActive("/apoios") ? "text-brand-600 bg-brand-50 font-semibold" : "text-ink-muted hover:bg-brand-50"]} aria-current={isActive("/apoios") ? "page" : undefined}>Apoios</a>
+          <a href="/formularios" class:list={["nav-link hidden md:inline px-3 py-2 rounded-md no-underline", isActive("/formularios") ? "text-brand-600 bg-brand-50 font-semibold" : "text-ink-muted hover:bg-brand-50"]} aria-current={isActive("/formularios") ? "page" : undefined}>Formulários</a>
+          <a href="/sobre" class:list={["nav-link hidden md:inline px-3 py-2 rounded-md no-underline", isActive("/sobre") ? "text-brand-600 bg-brand-50 font-semibold" : "text-ink-muted hover:bg-brand-50"]} aria-current={isActive("/sobre") ? "page" : undefined}>Sobre</a>
         </nav>
       </div>
     </header>
