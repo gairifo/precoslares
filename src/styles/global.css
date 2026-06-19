@@ -48,6 +48,12 @@
     @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium
            bg-brand-50 text-brand-700;
   }
+  .chip-filter {
+    @apply cursor-pointer border border-rule bg-white text-ink-muted hover:border-brand-100 hover:text-brand-600 transition;
+  }
+  .chip-filter.chip-active {
+    @apply bg-brand-500 text-white border-brand-500;
+  }
   .badge-elig-certa { @apply bg-emerald-100 text-emerald-800; }
   .badge-elig-provavel { @apply bg-brand-100 text-brand-700; }
   .badge-elig-possivel { @apply bg-amber-100 text-amber-900; }

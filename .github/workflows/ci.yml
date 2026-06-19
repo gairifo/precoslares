@@ -83,11 +83,12 @@ jobs:
 
       # ── Client bundle size cap ────────────────────────────────────────
       # Wizard is the only React island and the only place the lares
-      # JSON could leak in. Cap the gzip'd Wizard chunk at 20 kB and
-      # total client JS at 90 kB (React runtime is ~58 kB on its own;
-      # the 1.5 MB lares.json leaking would still trip the cap).
+      # JSON could leak in. It now embeds the slim lares dataset (1,841
+      # entries), so cap the gzip'd Wizard chunk at 80 kB and total
+      # client JS at 160 kB (React runtime is ~58 kB on its own;
+      # the 1.5 MB full lares.json leaking would still trip the cap).
       # See plan §A10 + performance #5.
-      - name: Guard — client bundle size cap (Wizard ≤ 20 kB gz, total ≤ 90 kB gz)
+      - name: Guard — client bundle size cap (Wizard ≤ 80 kB gz, total ≤ 160 kB gz)
         run: |
           set -e
           wizard=$(ls dist/_astro/Wizard*.js 2>/dev/null | head -1 || true)
@@ -98,14 +99,14 @@ jobs:
           fi
           wsize=$(gzip -c "$wizard" | wc -c | tr -d ' ')
           echo "Wizard chunk gzipped: ${wsize} bytes"
-          if [ "$wsize" -ge 20000 ]; then
-            echo "❌ Wizard chunk exceeds 20 kB gz (${wsize} bytes)"
+          if [ "$wsize" -ge 80000 ]; then
+            echo "❌ Wizard chunk exceeds 80 kB gz (${wsize} bytes)"
             exit 1
           fi
           total=$(find dist/_astro -name '*.js' -exec gzip -c {} \; | wc -c | tr -d ' ')
           echo "Total client JS gzipped: ${total} bytes"
-          if [ "$total" -ge 90000 ]; then
-            echo "❌ Total client JS exceeds 90 kB gz (${total} bytes)"
+          if [ "$total" -ge 160000 ]; then
+            echo "❌ Total client JS exceeds 160 kB gz (${total} bytes)"
             exit 1
           fi
           echo "✓ Bundle within budget"
